@@ -1,0 +1,58 @@
+import { PrismaClient, Teacher } from "@prisma/client";
+import bcrypt from "bcrypt";
+
+const prisma = new PrismaClient();
+
+type TeacherInput = {
+  nombre: string;
+  apellidos: string;
+  correo: string;
+  password: string;
+};
+
+export async function POST(req: Request): Promise<Response> {
+  try {
+    const body: TeacherInput = await req.json();
+    const { nombre, apellidos, correo, password } = body;
+
+    if (!nombre || !apellidos || !correo || !password) {
+      return new Response(
+        JSON.stringify({ error: "Todos los campos son requeridos" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    // Encriptar contraseña
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Crear docente
+    const newTeacher: Teacher = await prisma.teacher.create({
+      data: {
+        nombre,
+        apellidos,
+        correo,
+        password: hashedPassword,
+        rolId: 2,
+      },
+    });
+
+    return new Response(
+      JSON.stringify({ message: "Docente creado", teacher: newTeacher }),
+      { status: 201, headers: { "Content-Type": "application/json" } }
+    );
+  } catch (error: any) {
+    console.error(error);
+
+    if (error.code === "P2002") {
+      return new Response(JSON.stringify({ error: "Correo ya registrado" }), {
+        status: 409,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(JSON.stringify({ error: "Error al crear docente" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+}
