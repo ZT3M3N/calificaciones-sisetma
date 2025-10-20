@@ -1,4 +1,3 @@
-// app/(dashboards)/admin-dashboard/estudiantes/page.tsx
 import { prisma } from "@/lib/prisma";
 import DataTable from "@/components/admin/DataTable";
 import { TableHead, TableCell } from "@/components/ui/table";

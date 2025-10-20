@@ -1,4 +1,3 @@
-// app/(dashboards)/admin-dashboard/docentes/page.tsx
 import { prisma } from "@/lib/prisma";
 import DataTable from "@/components/admin/DataTable";
 import ActionButtons from "@/components/admin/ActionButtons";

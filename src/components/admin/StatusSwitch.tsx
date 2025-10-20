@@ -1,4 +1,3 @@
-// components/admin/StatusSwitch.tsx
 "use client"
 
 import { useState } from "react"

@@ -11,6 +11,7 @@ import {
   UserRoundCheck,
   Settings,
   BookUser,
+  File,
 } from "lucide-react";
 
 export default function AdminCards() {
@@ -62,6 +63,12 @@ export default function AdminCards() {
       icon: Boxes,
       color: "bg-teal-500",
       href: "/admin-dashboard/grupos",
+    },
+    {
+      title: "Asignaciones",
+      icon: File,
+      color: "bg-teal-500",
+      href: "/admin-dashboard/planes",
     },
     {
       title: "Usuarios",

@@ -23,7 +23,7 @@ export async function POST(req: Request): Promise<Response> {
         apellidos,
         correo,
         password: hashedPassword,
-        rolId: 1, // Si tu rol "Admin" tiene ID = 1
+        rolId: 1, 
       },
     });
 

@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useRouter } from "next/router";
 
 type TeacherInput = {
   nombre: string;
@@ -64,8 +63,8 @@ export default function RegistroMaestro() {
     <div className="flex items-center justify-center min-h-screen">
       <Card className="w-full max-w-sm text-center">
         <CardHeader>
-          <CardTitle className="text-center">
-            Rellena el siguiente formulario con tus datos
+          <CardTitle className="text-center text-2xl">
+            Rellena el siguiente formulario con los datos del docente
           </CardTitle>
         </CardHeader>
         <CardContent>

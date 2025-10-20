@@ -22,10 +22,8 @@ export async function POST(req: Request): Promise<Response> {
       );
     }
 
-    // Encriptar contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Crear estudiante
     const newStudent: Admin = await prisma.admin.create({
       data: {
         nombre,

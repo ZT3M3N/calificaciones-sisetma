@@ -22,10 +22,8 @@ export async function POST(req: Request): Promise<Response> {
       );
     }
 
-    // Encriptar contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Crear docente
     const newTeacher: Teacher = await prisma.teacher.create({
       data: {
         nombre,
@@ -51,6 +49,26 @@ export async function POST(req: Request): Promise<Response> {
     }
 
     return new Response(JSON.stringify({ error: "Error al crear docente" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+}
+
+export async function GET() {
+  try {
+    const teachers = await prisma.teacher.findMany({
+      include: { rol: true },
+      orderBy: { id: "asc" },
+    });
+
+    return new Response(JSON.stringify(teachers), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    console.error(error);
+    return new Response(JSON.stringify({ error: "Error al obtener docentes" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });

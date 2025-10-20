@@ -1,4 +1,3 @@
-// components/admin/ActionButtons.tsx
 "use client"
 
 import { useRouter } from "next/navigation"
@@ -11,7 +10,6 @@ export default function ActionButtons({ studentId }: Props) {
   const router = useRouter()
 
   const handleEdit = () => {
-    // Redirigir a la página de edición del estudiante
     router.push(`/admin-dashboard/estudiantes/${studentId}/edit`)
   }
 
@@ -22,7 +20,6 @@ export default function ActionButtons({ studentId }: Props) {
       method: "DELETE",
     })
 
-    // Recargar la página después de eliminar
     router.refresh()
   }
 
