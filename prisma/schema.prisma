@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,201 +8,219 @@ datasource db {
 }
 
 model Rol {
-  id        Int       @id @default(autoincrement())
-  nombre    String    @db.VarChar(50)
-  students  Student[]
-  teachers  Teacher[]
-  admins    Admin[]
+  id     Int    @id @default(autoincrement())
+  nombre String
+
+  estudiantes     Estudiante[]
+  docentes        Docente[]
+  administradores Administrador[]
 }
 
-model Student {
-  id                 Int                 @id @default(autoincrement())
-  nombre             String              @db.VarChar(50)
-  apellidos          String              @db.VarChar(100)
-  correo             String              @unique @db.VarChar(100)
-  matricula          String              @unique @db.VarChar(50)
-  telefono           String              @unique @db.VarChar(50)
-  direccion          String              @db.VarChar(100)
-  carrera            String              @db.VarChar(50)
-  status             String              @db.VarChar(50)
-  password           String              @db.VarChar(255)
-  createdAt          DateTime            @default(now()) @map("created_at")
-  rolId              Int?
-  rol                Rol?                @relation(fields: [rolId], references: [id])
-  inscripcionesGrupo InscripcionGrupo[]
-  calificaciones     Calificacion[]
-  asistencias        Asistencia[]
+model Carrera {
+  id          Int      @id @default(autoincrement())
+  nombre      String   @unique
+  descripcion String?
+  clave       String   @unique
+  createdAt   DateTime @default(now()) @map("created_at")
 
-  @@map("student")
+  estudiantes Estudiante[]
+  docentes    Docente[]
+  grupos      Grupo[]
+  asignaturas Asignatura[]
 }
 
-model Teacher {
-  id                Int                 @id @default(autoincrement())
-  nombre            String              @db.VarChar(50)
-  apellidos         String              @db.VarChar(100)
-  correo            String              @unique @db.VarChar(100)
-  password          String              @db.VarChar(255)
-  createdAt         DateTime            @default(now()) @map("created_at")
-  rolId             Int?
-  rol               Rol?                @relation(fields: [rolId], references: [id])
-  asignaturas       AsignaturaTeacher[]
-  gruposTutoria     Grupo[]
+model Estudiante {
+  id          Int      @id @default(autoincrement())
+  nombre      String
+  apellidos   String
+  matricula   String   @unique
+  correo      String   @unique
+  direccion   String
+  telefono    String   @unique
+  estado      String
+  contraseña String
+  createdAt   DateTime @default(now()) @map("created_at")
 
-  @@map("teacher")
+  rolId     Int
+  carreraId Int
+
+  rol     Rol     @relation(fields: [rolId], references: [id])
+  carrera Carrera @relation(fields: [carreraId], references: [id])
+
+  inscripciones  InscripcionGrupo[]
+  calificaciones Calificacion[]
+  asistencias    Asistencia[]
 }
 
-model Admin {
-  id        Int      @id @default(autoincrement())
-  nombre    String   @db.VarChar(50)
-  apellidos String   @db.VarChar(100)
-  correo    String   @unique @db.VarChar(100)
-  password  String   @db.VarChar(255)
-  createdAt DateTime @default(now()) @map("created_at")
-  rolId     Int?
-  rol       Rol?     @relation(fields: [rolId], references: [id])
+model Docente {
+  id          Int      @id @default(autoincrement())
+  nombre      String
+  apellidos   String
+  telefono    String   @unique
+  correo      String   @unique
+  contraseña String
+  createdAt   DateTime @default(now()) @map("created_at")
 
-  @@map("admin")
+  rolId     Int
+  carreraId Int?
+
+  rol     Rol      @relation(fields: [rolId], references: [id])
+  carrera Carrera? @relation(fields: [carreraId], references: [id])
+
+  grupos      Grupo[] // Grupos donde es tutor
+  asignaturas AsignaturaDocente[] // Asignaturas que imparte
+}
+
+model Administrador {
+  id          Int      @id @default(autoincrement())
+  nombre      String
+  apellidos   String
+  correo      String   @unique
+  contraseña String
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  rolId Int
+  rol   Rol @relation(fields: [rolId], references: [id])
 }
 
 model Tutor {
   id        Int      @id @default(autoincrement())
-  nombre    String   @db.VarChar(50)
-  apellidos String   @db.VarChar(50)
+  nombre    String
+  apellidos String
   createdAt DateTime @default(now()) @map("created_at")
-
-  @@map("tutor")
 }
 
 model Turno {
-  id         Int      @id @default(autoincrement())
-  nombre     String   @db.VarChar(50)
-  horaInicio DateTime @map("hora_inicio") @db.Time
-  horaFin    DateTime @map("hora_fin") @db.Time
-  createdAt  DateTime @default(now()) @map("created_at")
-  grupos     Grupo[]
+  id          Int      @id @default(autoincrement())
+  nombre      String
+  hora_inicio DateTime
+  hora_fin    DateTime
+  createdAt   DateTime @default(now()) @map("created_at")
 
-  @@map("turno")
+  grupos Grupo[]
 }
 
 model Grupo {
-  id                 Int                 @id @default(autoincrement())
-  nombre             String              @db.VarChar(50)
-  semestre           Int
-  carrera            String              @db.VarChar(50)
-  turnoId            Int
-  teacherId          Int?
-  capacidadMaxima    Int?                @default(40) @map("capacidad_maxima")
-  createdAt          DateTime            @default(now()) @map("created_at")
-  turno              Turno               @relation(fields: [turnoId], references: [id])
-  teacher            Teacher?            @relation(fields: [teacherId], references: [id])
-  asignaturas        AsignaturaTeacher[]
-  inscripcionesGrupo InscripcionGrupo[]
+  id               Int      @id @default(autoincrement())
+  nombre           String
+  semestre         Int
+  capacidad_maxima Int      @default(40)
+  createdAt        DateTime @default(now()) @map("created_at")
 
-  @@map("grupo")
+  turnoId   Int
+  carreraId Int
+  docenteId Int?
+
+  turno   Turno    @relation(fields: [turnoId], references: [id])
+  carrera Carrera  @relation(fields: [carreraId], references: [id])
+  docente Docente? @relation(fields: [docenteId], references: [id])
+
+  asignaturas   AsignaturaDocente[]
+  inscripciones InscripcionGrupo[]
 }
 
 model Asignatura {
-  id              Int                 @id @default(autoincrement())
-  nombre          String              @db.VarChar(100)
-  clave           String              @unique @db.VarChar(20)
+  id              Int      @id @default(autoincrement())
+  nombre          String
+  clave           String   @unique
   creditos        Int
-  horasSemanales  Int                 @map("horas_semanales")
+  horas_semanales Int
   semestre        Int
-  carrera         String              @db.VarChar(50)
-  descripcion     String?             @db.Text
-  createdAt       DateTime            @default(now()) @map("created_at")
-  asignaturaTeachers AsignaturaTeacher[]
+  descripcion     String?
+  createdAt       DateTime @default(now()) @map("created_at")
 
-  @@map("asignatura")
+  carreraId Int
+  carrera   Carrera @relation(fields: [carreraId], references: [id])
+
+  docentes AsignaturaDocente[]
 }
 
-model AsignaturaTeacher {
-  id             Int            @id @default(autoincrement())
-  asignaturaId   Int
-  teacherId      Int
-  grupoId        Int
-  cicloEscolar   String         @map("ciclo_escolar") @db.VarChar(20)
-  createdAt      DateTime       @default(now()) @map("created_at")
-  asignatura     Asignatura     @relation(fields: [asignaturaId], references: [id])
-  teacher        Teacher        @relation(fields: [teacherId], references: [id])
-  grupo          Grupo          @relation(fields: [grupoId], references: [id])
-  horarios       Horario[]
-  calificaciones Calificacion[]
-  asistencias    Asistencia[]
+model AsignaturaDocente {
+  id           Int      @id @default(autoincrement())
+  asignaturaId Int
+  docenteId    Int
+  grupoId      Int
+  cicloEscolar String
+  createdAt    DateTime @default(now()) @map("created_at")
 
-  @@unique([asignaturaId, grupoId, cicloEscolar], name: "unique_asignatura_grupo")
-  @@map("asignatura_teacher")
+  asignatura Asignatura @relation(fields: [asignaturaId], references: [id])
+  docente    Docente    @relation(fields: [docenteId], references: [id])
+  grupo      Grupo      @relation(fields: [grupoId], references: [id])
+
+  calificaciones Calificacion[]
+  horarios       Horario[]
+  asistencias    Asistencia[] // ⚠️ Aquí añadimos la relación inversa
+
+  @@unique([asignaturaId, grupoId, cicloEscolar], name: "unico_asignatura_grupo")
 }
 
 model InscripcionGrupo {
   id               Int      @id @default(autoincrement())
-  studentId        Int
+  estudianteId     Int
   grupoId          Int
-  cicloEscolar     String   @map("ciclo_escolar") @db.VarChar(20)
-  fechaInscripcion DateTime @map("fecha_inscripcion") @db.Date
-  status           String   @default("Activo") @db.VarChar(20)
+  ciclo_escolar    String
+  fechaInscripcion DateTime
+  estado           String   @default("Activo")
   createdAt        DateTime @default(now()) @map("created_at")
-  student          Student  @relation(fields: [studentId], references: [id])
-  grupo            Grupo    @relation(fields: [grupoId], references: [id])
 
-  @@unique([studentId, grupoId, cicloEscolar], name: "unique_student_grupo_ciclo")
-  @@map("inscripcion_grupo")
+  estudiante Estudiante @relation(fields: [estudianteId], references: [id])
+  grupo      Grupo      @relation(fields: [grupoId], references: [id])
+
+  @@unique([estudianteId, grupoId, ciclo_escolar], name: "unico_estudiante_grupo_ciclo")
 }
 
 model Horario {
-  id                  Int               @id @default(autoincrement())
-  asignaturaTeacherId Int               @map("asignatura_teacherId")
-  diaSemana           String            @map("dia_semana") @db.VarChar(20)
-  horaInicio          DateTime          @map("hora_inicio") @db.Time
-  horaFin             DateTime          @map("hora_fin") @db.Time
-  aula                String            @db.VarChar(20)
-  createdAt           DateTime          @default(now()) @map("created_at")
-  asignaturaTeacher   AsignaturaTeacher @relation(fields: [asignaturaTeacherId], references: [id])
+  id                   Int      @id @default(autoincrement())
+  asignatura_docenteId Int
+  dia_semana           String
+  hora_inicio          DateTime
+  hora_fin             DateTime
+  aula                 String
+  createdAt            DateTime @default(now()) @map("created_at")
 
-  @@map("horario")
+  asignatura_docente AsignaturaDocente @relation(fields: [asignatura_docenteId], references: [id])
 }
 
 model PeriodoEvaluacion {
-  id             Int            @id @default(autoincrement())
-  nombre         String         @db.VarChar(50)
-  fechaInicio    DateTime       @map("fecha_inicio") @db.Date
-  fechaFin       DateTime       @map("fecha_fin") @db.Date
-  cicloEscolar   String         @map("ciclo_escolar") @db.VarChar(20)
-  porcentaje     Decimal        @db.Decimal(5, 2)
-  createdAt      DateTime       @default(now()) @map("created_at")
-  calificaciones Calificacion[]
+  id            Int      @id @default(autoincrement())
+  nombre        String
+  fecha_inicio  DateTime
+  fecha_fin     DateTime
+  ciclo_escolar String
+  porcentaje    Float
+  createdAt     DateTime @default(now()) @map("created_at")
 
-  @@map("periodo_evaluacion")
+  calificaciones Calificacion[]
 }
 
 model Calificacion {
-  id                    Int                @id @default(autoincrement())
-  studentId             Int
-  asignaturaTeacherId   Int                @map("asignatura_teacherId")
-  periodoEvaluacionId   Int                @map("periodo_evaluacionId")
-  calificacion          Decimal            @db.Decimal(5, 2)
-  falta                 Int                @default(0)
-  observaciones         String?            @db.Text
-  fechaRegistro         DateTime           @default(now()) @map("fecha_registro")
-  student               Student            @relation(fields: [studentId], references: [id])
-  asignaturaTeacher     AsignaturaTeacher  @relation(fields: [asignaturaTeacherId], references: [id])
-  periodoEvaluacion     PeriodoEvaluacion  @relation(fields: [periodoEvaluacionId], references: [id])
+  id                   Int      @id @default(autoincrement())
+  estudianteId         Int
+  asignatura_docenteId Int
+  periodo_evaluacionId Int
+  calificacion         Float
+  faltas               Int      @default(0)
+  observaciones        String?
+  fecha_registro       DateTime @default(now())
 
-  @@unique([studentId, asignaturaTeacherId, periodoEvaluacionId], name: "unique_calificacion")
-  @@map("calificacion")
+  estudiante         Estudiante        @relation(fields: [estudianteId], references: [id])
+  asignatura_docente AsignaturaDocente @relation(fields: [asignatura_docenteId], references: [id])
+  periodo_evaluacion PeriodoEvaluacion @relation(fields: [periodo_evaluacionId], references: [id])
+
+  @@unique([estudianteId, asignatura_docenteId, periodo_evaluacionId], name: "unico_calificacion")
 }
 
 model Asistencia {
-  id                  Int               @id @default(autoincrement())
-  studentId           Int
-  asignaturaTeacherId Int               @map("asignatura_teacherId")
-  fecha               DateTime          @db.Date
-  status              String            @db.VarChar(20)
-  observaciones       String?           @db.Text
-  createdAt           DateTime          @default(now()) @map("created_at")
-  student             Student           @relation(fields: [studentId], references: [id])
-  asignaturaTeacher   AsignaturaTeacher @relation(fields: [asignaturaTeacherId], references: [id])
+  id                   Int      @id @default(autoincrement())
+  estudianteId         Int
+  asignatura_docenteId Int
+  fecha                DateTime
+  estado               String
+  observaciones        String?
+  createdAt            DateTime @default(now()) @map("created_at")
 
-  @@unique([studentId, asignaturaTeacherId, fecha], name: "unique_asistencia")
-  @@map("asistencia")
+  estudiante         Estudiante        @relation(fields: [estudianteId], references: [id])
+  asignatura_docente AsignaturaDocente @relation(fields: [asignatura_docenteId], references: [id])
+
+  @@unique([estudianteId, asignatura_docenteId, fecha], name: "unico_asistencia")
 }

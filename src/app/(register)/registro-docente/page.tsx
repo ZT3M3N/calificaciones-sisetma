@@ -15,6 +15,7 @@ type TeacherInput = {
   nombre: string;
   apellidos: string;
   correo: string;
+  telefono: string;
   password: string;
 };
 
@@ -23,6 +24,7 @@ export default function RegistroMaestro() {
     nombre: "",
     apellidos: "",
     correo: "",
+    telefono: "",
     password: "",
   });
 
@@ -39,7 +41,7 @@ export default function RegistroMaestro() {
     setMessage("");
 
     try {
-      const res = await fetch("/api/teachers", {
+      const res = await fetch("/api/docentes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -48,7 +50,13 @@ export default function RegistroMaestro() {
       const data = await res.json();
       if (res.ok) {
         setMessage("✅ Registro exitoso");
-        setForm({ nombre: "", apellidos: "", correo: "", password: "" });
+        setForm({
+          nombre: "",
+          apellidos: "",
+          correo: "",
+          telefono: "",
+          password: "",
+        });
       } else {
         setMessage(`❌ ${data.error}`);
       }
@@ -96,6 +104,17 @@ export default function RegistroMaestro() {
                 required
               />
             </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="apellidos">Teléfono:</Label>
+              <Input
+                id="telefono"
+                value={form.telefono}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
             <div className="grid gap-2">
               <Label htmlFor="password">Contraseña:</Label>
               <Input

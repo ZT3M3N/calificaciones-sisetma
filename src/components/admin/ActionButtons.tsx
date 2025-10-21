@@ -1,27 +1,29 @@
-"use client"
+"use client";
 
-import { useRouter } from "next/navigation"
+import { useRouter } from "next/navigation";
 
 interface Props {
-  studentId: number
+  id: number;
+  entity: string;
 }
 
-export default function ActionButtons({ studentId }: Props) {
-  const router = useRouter()
+export default function ActionButtons({ id, entity }: Props) {
+  const router = useRouter();
 
   const handleEdit = () => {
-    router.push(`/admin-dashboard/estudiantes/${studentId}/edit`)
-  }
+    router.push(`/admin-dashboard/${entity}/${id}/edit`);
+  };
 
   const handleDelete = async () => {
-    if (!confirm("¿Estás seguro de eliminar este estudiante?")) return
+    if (!confirm(`¿Estás seguro de eliminar este ${entity.slice(0 - 1)}?`))
+      return;
 
-    await fetch(`/api/students/${studentId}`, {
+    await fetch(`/api/${entity}/${id}`, {
       method: "DELETE",
-    })
+    });
 
-    router.refresh()
-  }
+    router.refresh();
+  };
 
   return (
     <div className="flex gap-2">
@@ -38,5 +40,5 @@ export default function ActionButtons({ studentId }: Props) {
         Eliminar
       </button>
     </div>
-  )
+  );
 }

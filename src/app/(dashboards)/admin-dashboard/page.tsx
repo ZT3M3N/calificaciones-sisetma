@@ -1,5 +1,5 @@
-import AdminCards from "./AdminCards";
-import LogoutButton from "./LogoutButton";
+import AdminCards from "./components/AdminCards";
+import LogoutButton from "./components/LogoutButton";
 
 export default function AdminDashboard() {
   return (

@@ -1,4 +1,4 @@
-import { PrismaClient, Admin } from "@prisma/client";
+import { PrismaClient, Administrador } from "@prisma/client";
 import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
@@ -14,6 +14,7 @@ export async function POST(req: Request): Promise<Response> {
   try {
     const body: AdminInput = await req.json();
     const { nombre, apellidos, correo, password } = body;
+    console.log(body)
 
     if (!nombre || !apellidos || !correo || !password) {
       return new Response(
@@ -24,12 +25,12 @@ export async function POST(req: Request): Promise<Response> {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newStudent: Admin = await prisma.admin.create({
+    const newStudent: Administrador = await prisma.administrador.create({
       data: {
         nombre,
         apellidos,
         correo,
-        password: hashedPassword,
+        contraseña: hashedPassword,
         rolId: 1,
       },
     });

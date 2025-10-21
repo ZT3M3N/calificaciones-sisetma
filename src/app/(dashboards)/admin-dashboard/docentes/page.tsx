@@ -3,7 +3,7 @@ import DataTable from "@/components/admin/DataTable";
 import ActionButtons from "@/components/admin/ActionButtons";
 
 export default async function DocentesAdminView() {
-  const teachers = await prisma.teacher.findMany();
+  const teachers = await prisma.docente.findMany();
   return (
     <DataTable
           title="Docentes"
@@ -17,7 +17,7 @@ export default async function DocentesAdminView() {
             {
               header: "Acciones",
               accessor: "id",
-              render: (_val, row) => <ActionButtons studentId={row.id} />,
+              render: (_val, row) => <ActionButtons id={row.id} entity="docentes" />,
             },
             {
               header: "Fecha creación",

@@ -15,7 +15,7 @@ export default function StatusSwitch({ id, status }: Props) {
     setChecked(value)
     const newStatus = value ? "activo" : "inactivo"
 
-    await fetch(`/api/students/${id}/status`, {
+    await fetch(`/api/estudiantes/${id}/status`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: newStatus }),

@@ -3,11 +3,11 @@ import DataTable from "@/components/admin/DataTable";
 import ActionButtons from "@/components/admin/ActionButtons";
 
 export default async function TutoresAdminView() {
-  const teachers = await prisma.teacher.findMany();
+  const tutores = await prisma.tutor.findMany();
   return (
     <DataTable
       title="Tutores"
-      data={teachers}
+      data={tutores}
       columns={[
         { header: "Nombre", accessor: "nombre" },
         { header: "Apellidos", accessor: "apellidos" },
@@ -26,7 +26,7 @@ export default async function TutoresAdminView() {
         },
       ]}
       actionButtons={[
-        { label: "Registrar nuevo tutor", href: "/registro-docente" },
+        { label: "Registrar nuevo tutor", href: "/registro-tutor" },
       ]}
     />
   );

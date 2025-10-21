@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,7 +12,12 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useRouter } from "next/navigation";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,45 +28,58 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-type UserInput = {
+type Carrera = { id: number; nombre: string };
+type StudentInput = {
   id?: number;
   nombre: string;
   apellidos: string;
-  carrera: string;
   matricula: string;
   direccion: string;
   telefono: string;
   correo: string;
-  password?: string;
-  status?: string;
+  contraseña?: string;
+  estado?: string;
+  carreraId?: number;
 };
 
 export default function StudentForm({
   student,
   isEdit = false,
 }: {
-  student?: UserInput;
+  student?: StudentInput;
   isEdit?: boolean;
 }) {
-  const [form, setForm] = React.useState<UserInput>(
+  const [form, setForm] = React.useState<StudentInput>(
     student || {
       nombre: "",
       apellidos: "",
-      carrera: "",
       matricula: "",
       direccion: "",
       telefono: "",
       correo: "",
-      password: "",
-      status: "activo",
+      contraseña: "",
+      estado: "activo",
+      carreraId: undefined,
     }
   );
+  const [carreras, setCarreras] = React.useState<Carrera[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [message, setMessage] = React.useState("");
   const [openAlert, setOpenAlert] = React.useState(false);
+
   const router = useRouter();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  // Traer carreras al montar
+  React.useEffect(() => {
+    fetch("/api/carreras")
+      .then((res) => res.json())
+      .then((data) => setCarreras(data))
+      .catch((err) => console.error("Error cargando carreras:", err));
+  }, []);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     setForm({ ...form, [e.target.id]: e.target.value });
   };
 
@@ -69,12 +87,17 @@ export default function StudentForm({
     e.preventDefault();
     setLoading(true);
     setMessage("");
+
     try {
-      const res = await fetch(isEdit ? `/api/students/${form.id}` : "/api/students", {
-        method: isEdit ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+      const res = await fetch(
+        isEdit ? `/api/estudiantes/${form.id}` : "/api/estudiantes",
+        {
+          method: isEdit ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        }
+      );
+
       const data = await res.json();
       if (res.ok) setMessage("✅ Operación exitosa");
       else setMessage(`❌ ${data.error}`);
@@ -89,54 +112,107 @@ export default function StudentForm({
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-6">
-
       <Card className="w-full max-w-xl rounded-xl shadow-lg">
         <CardHeader>
           <CardTitle className="text-2xl text-center">
             {isEdit ? "Editar datos del estudiante" : "Registro de estudiante"}
           </CardTitle>
         </CardHeader>
+
         <CardContent>
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <form
+            onSubmit={handleSubmit}
+            className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+          >
             <div className="flex flex-col gap-1">
               <Label htmlFor="nombre">Nombre(s)</Label>
-              <Input id="nombre" value={form.nombre} onChange={handleChange} required />
+              <Input
+                id="nombre"
+                value={form.nombre}
+                onChange={handleChange}
+                required
+              />
             </div>
             <div className="flex flex-col gap-1">
               <Label htmlFor="apellidos">Apellidos</Label>
-              <Input id="apellidos" value={form.apellidos} onChange={handleChange} required />
+              <Input
+                id="apellidos"
+                value={form.apellidos}
+                onChange={handleChange}
+                required
+              />
             </div>
 
-            <div className="flex flex-col gap-1">
-              <Label htmlFor="carrera">Carrera</Label>
-              <Input id="carrera" value={form.carrera} onChange={handleChange} required />
-            </div>
             <div className="flex flex-col gap-1">
               <Label htmlFor="matricula">Matrícula</Label>
-              <Input id="matricula" value={form.matricula} onChange={handleChange} required />
+              <Input
+                id="matricula"
+                value={form.matricula}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="correo">Correo</Label>
+              <Input
+                id="correo"
+                type="email"
+                value={form.correo}
+                onChange={handleChange}
+                required
+              />
             </div>
 
             <div className="flex flex-col gap-1">
-              <Label htmlFor="correo">Correo</Label>
-              <Input id="correo" type="email" value={form.correo} onChange={handleChange} required />
-            </div>
-            <div className="flex flex-col gap-1">
               <Label htmlFor="telefono">Teléfono</Label>
-              <Input id="telefono" value={form.telefono} onChange={handleChange} required />
+              <Input
+                id="telefono"
+                value={form.telefono}
+                onChange={handleChange}
+                required
+              />
             </div>
 
             <div className="flex flex-col gap-1 sm:col-span-2">
               <Label htmlFor="direccion">Dirección</Label>
-              <Input id="direccion" value={form.direccion} onChange={handleChange} required />
+              <Input
+                id="direccion"
+                value={form.direccion}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="flex flex-col gap-1 sm:col-span-2">
+              <Label htmlFor="carreraId">Carrera</Label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="w-full text-left">
+                    {form.carreraId
+                      ? carreras.find((c) => c.id === form.carreraId)?.nombre
+                      : "Selecciona una carrera"}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  {carreras.map((c) => (
+                    <DropdownMenuItem
+                      key={c.id}
+                      onClick={() => setForm({ ...form, carreraId: c.id })}
+                    >
+                      {c.nombre}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {!isEdit && (
               <div className="flex flex-col gap-1 sm:col-span-2">
-                <Label htmlFor="password">Contraseña</Label>
+                <Label htmlFor="contraseña">Contraseña</Label>
                 <Input
-                  id="password"
+                  id="contraseña"
                   type="password"
-                  value={form.password}
+                  value={form.contraseña}
                   onChange={handleChange}
                   required
                 />
@@ -145,10 +221,10 @@ export default function StudentForm({
 
             {isEdit && (
               <div className="flex flex-col gap-1 sm:col-span-2">
-                <Label htmlFor="status">Estado</Label>
+                <Label htmlFor="estado">Estado</Label>
                 <select
-                  id="status"
-                  value={form.status}
+                  id="estado"
+                  value={form.estado}
                   onChange={handleChange}
                   className="p-2 border rounded"
                 >
@@ -175,14 +251,6 @@ export default function StudentForm({
               ? "Guardar Cambios"
               : "Registrar Estudiante"}
           </Button>
-
-          {!isEdit && (
-            <Link href="/admin-dashboard/estudiantes" className="flex-1">
-              <Button variant="secondary" className="w-full" onClick={() => router.back()}>
-                Regresar
-              </Button>
-            </Link>
-          )}
         </CardFooter>
       </Card>
 
@@ -190,14 +258,16 @@ export default function StudentForm({
       <AlertDialog open={openAlert} onOpenChange={setOpenAlert}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{message.startsWith("✅") ? "Éxito" : "Error"}</AlertDialogTitle>
+            <AlertDialogTitle>
+              {message.startsWith("✅") ? "Éxito" : "Error"}
+            </AlertDialogTitle>
             <AlertDialogDescription>{message}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogAction
               onClick={() => {
                 setOpenAlert(false);
-                if (message.startsWith("✅") && isEdit) {
+                if (message.startsWith("✅")) {
                   router.push("/admin-dashboard/estudiantes");
                   router.refresh();
                 }

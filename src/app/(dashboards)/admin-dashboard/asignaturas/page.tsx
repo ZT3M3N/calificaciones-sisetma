@@ -10,10 +10,14 @@ export default async function AsignaturasAdminView() {
       data={asignaturas}
       columns={[
         { header: "Asignatura", accessor: "nombre" },
+        { header: "Clave", accessor: "clave" },
+        { header: "Creditos", accessor: "creditos" },
+        { header: "Horas semanales", accessor: "horas_semanales" },
+        { header: "Semestre", accessor: "semestre" },
         {
           header: "Acciones",
           accessor: "id",
-          render: (_val, row) => <ActionButtons studentId={row.id} />,
+          render: (_val, row) => <ActionButtons id={row.id} entity="asignaturas" />,
         },
         {
           header: "Fecha creación",
@@ -22,7 +26,7 @@ export default async function AsignaturasAdminView() {
         },
       ]}
       actionButtons={[
-        { label: "Registrar nueva asignatura", href: "/registro-docente" },
+        { label: "Registrar nueva asignatura", href: "/registro-asignatura" },
       ]}
     />
   );

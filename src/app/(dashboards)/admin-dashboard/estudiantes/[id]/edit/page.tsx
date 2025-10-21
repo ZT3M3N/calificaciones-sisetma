@@ -7,7 +7,7 @@ export default async function EditStudentPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const student = await prisma.student.findUnique({
+  const student = await prisma.estudiante.findUnique({
     where: { id: Number(id) },
   });
 

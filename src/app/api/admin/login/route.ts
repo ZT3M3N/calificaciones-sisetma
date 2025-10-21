@@ -8,24 +8,28 @@ const SECRET_KEY = process.env.JWT_SECRET!;
 
 export async function POST(req: Request) {
   try {
-    const { correo, password } = await req.json();
+    const { correo, contraseña } = await req.json();
+    console.log(correo, contraseña);
+    
 
-    if (!correo || !password) {
+    if (!correo || !contraseña) {
       return NextResponse.json(
         { error: "Correo y contraseña son requeridos" },
         { status: 400 }
       );
     }
 
-    const admin = await prisma.admin.findUnique({ where: { correo } });
+    const admin = await prisma.administrador.findUnique({ where: { correo } });
+    
     if (!admin) {
       return NextResponse.json(
+        
         { error: "Credenciales incorrectas" },
         { status: 401 }
       );
     }
 
-    const passwordMatch = await bcrypt.compare(password, admin.password);
+    const passwordMatch = await bcrypt.compare(contraseña, admin.contraseña);
     if (!passwordMatch) {
       return NextResponse.json(
         { error: "Credenciales incorrectas" },

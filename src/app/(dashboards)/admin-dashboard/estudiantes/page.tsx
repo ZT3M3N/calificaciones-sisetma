@@ -1,11 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import DataTable from "@/components/admin/DataTable";
-import { TableHead, TableCell } from "@/components/ui/table";
-import StatusSwitch from "@/components/admin/StatusSwitch";
 import ActionButtons from "@/components/admin/ActionButtons";
 
 export default async function EstudiantesAdminView() {
-  const students = await prisma.student.findMany();
+  const students = await prisma.estudiante.findMany({
+    include: { carrera: true },
+  });
 
   return (
     <DataTable
@@ -16,12 +16,16 @@ export default async function EstudiantesAdminView() {
         { header: "Apellidos", accessor: "apellidos" },
         { header: "Correo", accessor: "correo" },
         { header: "Matrícula", accessor: "matricula" },
-        { header: "Carrera", accessor: "carrera" },
+        {
+          header: "Carrera",
+          accessor: "carrera",
+          render: (_val, row) => row.carrera?.nombre || "Sin asignar",
+        },
         { header: "Teléfono", accessor: "telefono" },
         { header: "Dirección", accessor: "direccion" },
         {
           header: "Status",
-          accessor: "status",
+          accessor: "estado",
           render: (val) => (
             <span
               className={`px-2 py-1 rounded-full text-xs font-semibold ${
@@ -37,7 +41,9 @@ export default async function EstudiantesAdminView() {
         {
           header: "Acciones",
           accessor: "id",
-          render: (_val, row) => <ActionButtons studentId={row.id} />,
+          render: (_val, row) => (
+            <ActionButtons id={row.id} entity="estudiantes" />
+          ),
         },
         {
           header: "Fecha creación",

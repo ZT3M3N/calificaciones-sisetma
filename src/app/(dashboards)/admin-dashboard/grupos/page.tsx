@@ -22,7 +22,7 @@ export default async function GruposAdminView() {
         },
       ]}
       actionButtons={[
-        { label: "Registrar nueva asignatura", href: "/registro-docente" },
+        { label: "Registrar nuevo asignatura", href: "/registro-docente" },
       ]}
     />
   );

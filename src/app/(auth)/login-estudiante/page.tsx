@@ -4,7 +4,7 @@ export default function EstudianteLoginPage() {
   return (
     <LoginForm
       role="estudiante"
-      apiEndpoint="/api/student/login"
+      apiEndpoint="/api/estudiantes/login"
       redirectTo="/estudiante-dashboard"
       title="Inicia sesión en la cuenta de estudiante"
       registerLink="/registro-estudiante"

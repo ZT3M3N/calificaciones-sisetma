@@ -43,7 +43,7 @@ export default function LoginForm({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [contraseña, serContraseña] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
@@ -64,7 +64,7 @@ export default function LoginForm({
       const res = await fetch(apiEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ correo: email, password }),
+        body: JSON.stringify({ correo: email, contraseña }),
         credentials: "include",
       });
 
@@ -109,13 +109,13 @@ export default function LoginForm({
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="password">Contraseña:</Label>
+                <Label htmlFor="contraseña">Contraseña:</Label>
                 <Input
-                  id="password"
-                  type="password"
+                  id="contraseña"
+                  type="contraseña"
                   required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={contraseña}
+                  onChange={(e) => serContraseña(e.target.value)}
                 />
               </div>
 
