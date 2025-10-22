@@ -25,7 +25,6 @@ model Carrera {
 
   estudiantes Estudiante[]
   docentes    Docente[]
-  grupos      Grupo[]
   asignaturas Asignatura[]
 }
 
@@ -47,7 +46,6 @@ model Estudiante {
   rol     Rol     @relation(fields: [rolId], references: [id])
   carrera Carrera @relation(fields: [carreraId], references: [id])
 
-  inscripciones  InscripcionGrupo[]
   calificaciones Calificacion[]
   asistencias    Asistencia[]
 }
@@ -67,7 +65,6 @@ model Docente {
   rol     Rol      @relation(fields: [rolId], references: [id])
   carrera Carrera? @relation(fields: [carreraId], references: [id])
 
-  grupos      Grupo[] // Grupos donde es tutor
   asignaturas AsignaturaDocente[] // Asignaturas que imparte
 }
 
@@ -87,6 +84,7 @@ model Tutor {
   id        Int      @id @default(autoincrement())
   nombre    String
   apellidos String
+  telefono  String   @unique
   createdAt DateTime @default(now()) @map("created_at")
 }
 
@@ -96,27 +94,6 @@ model Turno {
   hora_inicio DateTime
   hora_fin    DateTime
   createdAt   DateTime @default(now()) @map("created_at")
-
-  grupos Grupo[]
-}
-
-model Grupo {
-  id               Int      @id @default(autoincrement())
-  nombre           String
-  semestre         Int
-  capacidad_maxima Int      @default(40)
-  createdAt        DateTime @default(now()) @map("created_at")
-
-  turnoId   Int
-  carreraId Int
-  docenteId Int?
-
-  turno   Turno    @relation(fields: [turnoId], references: [id])
-  carrera Carrera  @relation(fields: [carreraId], references: [id])
-  docente Docente? @relation(fields: [docenteId], references: [id])
-
-  asignaturas   AsignaturaDocente[]
-  inscripciones InscripcionGrupo[]
 }
 
 model Asignatura {
@@ -139,34 +116,18 @@ model AsignaturaDocente {
   id           Int      @id @default(autoincrement())
   asignaturaId Int
   docenteId    Int
-  grupoId      Int
-  cicloEscolar String
+  cicloEscolar String   @map("ciclo_escolar")
   createdAt    DateTime @default(now()) @map("created_at")
 
   asignatura Asignatura @relation(fields: [asignaturaId], references: [id])
   docente    Docente    @relation(fields: [docenteId], references: [id])
-  grupo      Grupo      @relation(fields: [grupoId], references: [id])
 
   calificaciones Calificacion[]
   horarios       Horario[]
-  asistencias    Asistencia[] // ⚠️ Aquí añadimos la relación inversa
+  asistencias    Asistencia[]
 
-  @@unique([asignaturaId, grupoId, cicloEscolar], name: "unico_asignatura_grupo")
-}
-
-model InscripcionGrupo {
-  id               Int      @id @default(autoincrement())
-  estudianteId     Int
-  grupoId          Int
-  ciclo_escolar    String
-  fechaInscripcion DateTime
-  estado           String   @default("Activo")
-  createdAt        DateTime @default(now()) @map("created_at")
-
-  estudiante Estudiante @relation(fields: [estudianteId], references: [id])
-  grupo      Grupo      @relation(fields: [grupoId], references: [id])
-
-  @@unique([estudianteId, grupoId, ciclo_escolar], name: "unico_estudiante_grupo_ciclo")
+  @@unique([asignaturaId, docenteId, cicloEscolar], name: "unico_asignatura_docente_ciclo")
+  @@map("asignatura_docente")
 }
 
 model Horario {

@@ -46,7 +46,7 @@ export default async function EstudiantesAdminView() {
           ),
         },
         {
-          header: "Fecha creación",
+          header: "Fecha de registro",
           accessor: "createdAt",
           render: (val) => new Date(val).toLocaleDateString(),
         },

@@ -12,7 +12,6 @@ import {
   Settings,
   BookUser,
   File,
-  BookAIcon,
   FlagIcon,
 } from "lucide-react";
 
@@ -67,16 +66,10 @@ export default function AdminCards() {
       href: "/admin-dashboard/carreras",
     },
     {
-      title: "Grupos",
-      icon: Boxes,
-      color: "bg-teal-500",
-      href: "/admin-dashboard/grupos",
-    },
-    {
       title: "Asignaciones",
       icon: File,
       color: "bg-teal-500",
-      href: "/admin-dashboard/planes",
+      href: "/admin-dashboard/asignaciones",
     },
     {
       title: "Usuarios",

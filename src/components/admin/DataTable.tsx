@@ -4,7 +4,6 @@ import {
   TableBody,
   TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -41,6 +40,28 @@ export default function DataTable({
   columns = [],
   actionButtons = [],
 }: DataTableProps) {
+  function formatValue(value: any) {
+    if (value instanceof Date) {
+      // Formatear hora o fecha según sea TIME o DATETIME
+      return value.toLocaleString("es-MX", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+
+    // Si es null o undefined
+    if (value === null || value === undefined) {
+      return "";
+    }
+
+    // Si es objeto (por ejemplo relaciones anidadas)
+    if (typeof value === "object") {
+      return JSON.stringify(value);
+    }
+
+    return value;
+  }
+
   return (
     <div className="max-w-7xl mx-auto my-10 p-6 bg-white rounded-xl shadow-lg border border-gray-200">
       {/* 🔹 Encabezado con botones */}
@@ -92,21 +113,14 @@ export default function DataTable({
             >
               {columns.map((col, i) => (
                 <TableCell key={i} className="text-gray-700 border">
-                  {col.render ? col.render(row[col.accessor], row) : row[col.accessor]}
+                  {col.render
+                    ? col.render(row[col.accessor], row)
+                    : formatValue(row[col.accessor])}
                 </TableCell>
               ))}
             </TableRow>
           ))}
         </TableBody>
-
-        <TableFooter>
-          <TableRow className="bg-gray-100">
-            <TableCell colSpan={columns.length - 1} className="font-semibold">
-              Total de {title.toLowerCase()} registrados:
-            </TableCell>
-            <TableCell className="text-right font-bold">{data.length}</TableCell>
-          </TableRow>
-        </TableFooter>
       </Table>
     </div>
   );
