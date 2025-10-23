@@ -13,6 +13,7 @@ import {
   BookUser,
   File,
   FlagIcon,
+  Calendar1,
 } from "lucide-react";
 
 export default function AdminCards() {
@@ -64,6 +65,12 @@ export default function AdminCards() {
       icon: FlagIcon,
       color: "bg-teal-500",
       href: "/admin-dashboard/carreras",
+    },
+    {
+      title: "Periodos Académicos",
+      icon: Calendar1,
+      color: "bg-teal-500",
+      href: "/admin-dashboard/periodos",
     },
     {
       title: "Asignaciones",

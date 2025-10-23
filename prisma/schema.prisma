@@ -152,6 +152,7 @@ model PeriodoEvaluacion {
   createdAt     DateTime @default(now()) @map("created_at")
 
   calificaciones Calificacion[]
+  @@map("periodo_evaluacion")
 }
 
 model Calificacion {
