@@ -48,6 +48,20 @@ model Estudiante {
 
   calificaciones Calificacion[]
   asistencias    Asistencia[]
+  asignaciones   AsignacionesAlumnos[]
+}
+
+model AsignacionesAlumnos {
+  id                   Int      @id @default(autoincrement())
+  estudianteId         Int
+  asignatura_docenteId Int
+  created_at           DateTime @default(now())
+
+  estudiante         Estudiante        @relation(fields: [estudianteId], references: [id])
+  asignatura_docente AsignaturaDocente @relation(fields: [asignatura_docenteId], references: [id])
+
+  @@unique([estudianteId, asignatura_docenteId], name: "unico_asignacion_alumno")
+  @@map("asignaciones_alumnos")
 }
 
 model Docente {
@@ -65,7 +79,7 @@ model Docente {
   rol     Rol      @relation(fields: [rolId], references: [id])
   carrera Carrera? @relation(fields: [carreraId], references: [id])
 
-  asignaturas AsignaturaDocente[] // Asignaturas que imparte
+  asignaturasAsignadas AsignaturaDocente[] // Asignaturas que imparte
 }
 
 model Administrador {
@@ -122,9 +136,10 @@ model AsignaturaDocente {
   asignatura Asignatura @relation(fields: [asignaturaId], references: [id])
   docente    Docente    @relation(fields: [docenteId], references: [id])
 
-  calificaciones Calificacion[]
-  horarios       Horario[]
-  asistencias    Asistencia[]
+  calificaciones      Calificacion[]
+  horarios            Horario[]
+  asistencias         Asistencia[]
+  AsignacionesAlumnos AsignacionesAlumnos[]
 
   @@unique([asignaturaId, docenteId, cicloEscolar], name: "unico_asignatura_docente_ciclo")
   @@map("asignatura_docente")
@@ -152,6 +167,7 @@ model PeriodoEvaluacion {
   createdAt     DateTime @default(now()) @map("created_at")
 
   calificaciones Calificacion[]
+
   @@map("periodo_evaluacion")
 }
 
@@ -176,9 +192,8 @@ model Asistencia {
   id                   Int      @id @default(autoincrement())
   estudianteId         Int
   asignatura_docenteId Int
-  fecha                DateTime
+  fecha                DateTime @db.Time()
   estado               String
-  observaciones        String?
   createdAt            DateTime @default(now()) @map("created_at")
 
   estudiante         Estudiante        @relation(fields: [estudianteId], references: [id])

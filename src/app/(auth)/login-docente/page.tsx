@@ -4,7 +4,7 @@ export default function DocenteLoginPage() {
   return (
     <LoginForm
       role="docente"
-      apiEndpoint="/api/teacher/login"
+      apiEndpoint="/api/docentes/login"
       redirectTo="/docente-dashboard"
       title="Inicia sesión con tu cuenta de docente"
       registerLink="/registro-docente"

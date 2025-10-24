@@ -5,22 +5,16 @@ import { Users } from "lucide-react";
 export default function AsignacionesCards() {
   const cards = [
     {
-      title: "Asignar docentes-asignaturas",
+      title: "Asignar Docentes-Asignaturas a Horarios",
       icon: Users,
       color: "bg-teal-500",
-      href: "asignaciones/asignatura-docente",
+      href: "asignaciones/asignatura-horario",
     },
     {
-      title: "Asignar docentes-horarios",
+      title: "Asignar Docentes-Asignaturas-Horarios a Alumnos",
       icon: Users,
       color: "bg-teal-500",
-      href: "asignaciones/asignatura-docente",
-    },
-    {
-      title: "Asignar docentes-alumnos",
-      icon: Users,
-      color: "bg-teal-500",
-      href: "asignaciones/asignatura-docente",
+      href: "asignaciones/asignatura-alumno",
     },
   ];
 
