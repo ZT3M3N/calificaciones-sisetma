@@ -16,6 +16,12 @@ export default function AsignacionesCards() {
       color: "bg-teal-500",
       href: "asignaciones/asignatura-alumno",
     },
+    {
+      title: "Asignar Periodos de evaluación a las Asignaturas",
+      icon: Users,
+      color: "bg-teal-500",
+      href: "asignaciones/asignatura-periodo",
+    },
   ];
 
   return (

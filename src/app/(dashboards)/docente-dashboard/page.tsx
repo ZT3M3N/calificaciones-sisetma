@@ -9,6 +9,7 @@ type Alumno = {
   apellidos: string;
   matricula: string;
 };
+
 type AsignaturaDocente = {
   id: number;
   asignatura: { nombre: string };
@@ -20,13 +21,19 @@ type AsignaturaDocente = {
   }[];
   AsignacionesAlumnos: { id: number; estudiante: Alumno }[];
 };
+
 type Docente = {
   id: number;
   nombre: string;
   apellidos: string;
   asignaturasAsignadas: AsignaturaDocente[];
 };
+
+// Asistencias: asignaturaId -> alumnoId -> fecha -> boolean
 type Asistencias = Record<number, Record<number, Record<string, boolean>>>;
+
+// Calificaciones: asignaturaId -> alumnoId -> number
+type Calificaciones = Record<number, Record<number, number>>;
 
 export default function DocenteDashboard() {
   const [docente, setDocente] = useState<Docente | null>(null);
@@ -34,6 +41,7 @@ export default function DocenteDashboard() {
     "horarios" | "alumnos" | "asistencias" | "calificaciones"
   >("horarios");
   const [asistencias, setAsistencias] = useState<Asistencias>({});
+  const [calificaciones, setCalificaciones] = useState<Calificaciones>({});
   const [loading, setLoading] = useState(false);
 
   // --- Cargar datos del docente ---
@@ -50,10 +58,11 @@ export default function DocenteDashboard() {
     fetchDocente();
   }, []);
 
+  // --- Cargar asistencias si estamos en ese tab ---
   useEffect(() => {
     if (tab !== "asistencias" || !docente) return;
 
-    const docenteId = docente.id; // Capturar el ID antes de la función async
+    const docenteId = docente.id;
 
     async function fetchAsistencias() {
       try {
@@ -65,7 +74,6 @@ export default function DocenteDashboard() {
           return;
         }
 
-        // data ya viene en el formato correcto
         setAsistencias(data);
       } catch (error) {
         console.error("Error al obtener asistencias:", error);
@@ -77,6 +85,7 @@ export default function DocenteDashboard() {
 
   if (!docente) return <p className="p-6">Cargando...</p>;
 
+  // --- Asistencias ---
   const handleAsistenciaChange = (
     alumnoId: number,
     asignaturaId: number,
@@ -98,39 +107,32 @@ export default function DocenteDashboard() {
   const guardarAsistencias = async (asignaturaId: number) => {
     try {
       setLoading(true);
-      
-      // Filtrar y limpiar los datos antes de enviar
+
       const asistenciasAsignatura = asistencias[asignaturaId] || {};
       const datosLimpios: Record<number, Record<string, boolean>> = {};
-      
-      // Solo incluir alumnos con ID válido (número)
+
       Object.entries(asistenciasAsignatura).forEach(([alumnoIdStr, fechas]) => {
         const alumnoId = Number(alumnoIdStr);
         if (!isNaN(alumnoId) && alumnoId > 0) {
           datosLimpios[alumnoId] = fechas;
         }
       });
-      
-      const dataAsignatura = {
-        [asignaturaId]: datosLimpios
-      };
-      
-      console.log("📤 Datos a enviar:", JSON.stringify(dataAsignatura, null, 2));
-      
+
+      const dataAsignatura = { [asignaturaId]: datosLimpios };
+
       const res = await fetch(`/api/docentes/${docente.id}/asistencias`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ data: dataAsignatura }),
       });
-      
+
       const data = await res.json();
-      console.log("📨 Respuesta del servidor:", data);
-      
+
       if (!res.ok) throw new Error(data.error || "Error desconocido");
-      
-      alert(`✅ ${data.message || 'Asistencias guardadas correctamente'}`);
+
+      alert(`✅ ${data.message || "Asistencias guardadas correctamente"}`);
     } catch (err: any) {
-      console.error("❌ Error completo:", err);
+      console.error(err);
       alert("❌ Error guardando asistencias: " + err.message);
     } finally {
       setLoading(false);
@@ -165,24 +167,18 @@ export default function DocenteDashboard() {
 
   const TablaAsistencias = ({ asig }: { asig: AsignaturaDocente }) => {
     const fechas = generarFechas(asig.horarios);
-    
-    console.log("🔍 Debug TablaAsistencias:", {
-      asignaturaId: asig.id,
-      nombreAsignatura: asig.asignatura.nombre,
-      totalAlumnos: asig.AsignacionesAlumnos?.length || 0,
-      fechasGeneradas: fechas,
-    });
-    
-    // Validar que hay alumnos
+
     if (!asig.AsignacionesAlumnos || asig.AsignacionesAlumnos.length === 0) {
       return (
         <div className="border p-4 rounded-lg shadow-sm">
           <p className="font-bold mb-2">{asig.asignatura.nombre}</p>
-          <p className="text-gray-500">No hay alumnos asignados a esta materia.</p>
+          <p className="text-gray-500">
+            No hay alumnos asignados a esta materia.
+          </p>
         </div>
       );
     }
-    
+
     return (
       <div className="border p-4 rounded-lg shadow-sm">
         <p className="font-bold mb-2">{asig.asignatura.nombre}</p>
@@ -199,52 +195,37 @@ export default function DocenteDashboard() {
               </tr>
             </thead>
             <tbody>
-              {asig.AsignacionesAlumnos.map((a) => {
-                // Debug para cada alumno
-                console.log("👤 Alumno:", {
-                  asignacionId: a.id,
-                  estudiante: a.estudiante,
-                  tieneId: !!a.estudiante?.id
-                });
-                
-                // Validar que el estudiante existe y tiene ID
-                if (!a.estudiante || !a.estudiante.id) {
-                  console.warn("⚠️ Estudiante sin ID en asignación:", a);
-                  return null;
-                }
-                
-                return (
-                  <tr key={a.id}>
-                    <td className="p-2 border whitespace-nowrap">
-                      {a.estudiante.nombre} {a.estudiante.apellidos}
-                    </td>
-                    {fechas.map((f) => {
-                      const checkboxId = `asist-${asig.id}-${a.estudiante.id}-${f}`;
-                      const isChecked = !!asistencias[asig.id]?.[a.estudiante.id]?.[f];
-                      
-                      return (
-                        <td key={f} className="p-2 border text-center">
-                          <input
-                            type="checkbox"
-                            id={checkboxId}
-                            checked={isChecked}
-                            onChange={(e) => {
-                              e.stopPropagation();
-                              handleAsistenciaChange(
-                                a.estudiante.id,
-                                asig.id,
-                                f,
-                                e.target.checked
-                              );
-                            }}
-                            className="cursor-pointer w-4 h-4"
-                          />
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
+              {asig.AsignacionesAlumnos.map((a) => (
+                <tr key={a.id}>
+                  <td className="p-2 border whitespace-nowrap">
+                    {a.estudiante.nombre} {a.estudiante.apellidos}
+                  </td>
+                  {fechas.map((f) => {
+                    const checkboxId = `asist-${asig.id}-${a.estudiante.id}-${f}`;
+                    const isChecked =
+                      !!asistencias[asig.id]?.[a.estudiante.id]?.[f];
+
+                    return (
+                      <td key={f} className="p-2 border text-center">
+                        <input
+                          type="checkbox"
+                          id={checkboxId}
+                          checked={isChecked}
+                          onChange={(e) =>
+                            handleAsistenciaChange(
+                              a.estudiante.id,
+                              asig.id,
+                              f,
+                              e.target.checked
+                            )
+                          }
+                          className="cursor-pointer w-4 h-4"
+                        />
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
@@ -254,6 +235,106 @@ export default function DocenteDashboard() {
           onClick={() => guardarAsistencias(asig.id)}
         >
           {loading ? "Guardando..." : "Guardar asistencias"}
+        </button>
+      </div>
+    );
+  };
+
+  // --- Calificaciones ---
+  const handleCalificacionChange = (
+    alumnoId: number,
+    asignaturaId: number,
+    valor: number
+  ) => {
+    setCalificaciones((prev) => ({
+      ...prev,
+      [asignaturaId]: {
+        ...(prev[asignaturaId] || {}),
+        [alumnoId]: valor,
+      },
+    }));
+  };
+
+  const guardarCalificaciones = async (asignaturaId: number) => {
+    try {
+      setLoading(true);
+      const dataAsignatura = calificaciones[asignaturaId] || {};
+
+      const res = await fetch(`/api/docentes/${docente?.id}/calificaciones`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: dataAsignatura }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || "Error desconocido");
+
+      alert(`✅ ${data.message || "Calificaciones guardadas correctamente"}`);
+    } catch (err: any) {
+      console.error(err);
+      alert("❌ Error guardando calificaciones: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const TablaCalificaciones = ({ asig }: { asig: AsignaturaDocente }) => {
+    if (!asig.AsignacionesAlumnos || asig.AsignacionesAlumnos.length === 0) {
+      return (
+        <div className="border p-4 rounded-lg shadow-sm">
+          <p className="font-bold mb-2">{asig.asignatura.nombre}</p>
+          <p className="text-gray-500">
+            No hay alumnos asignados a esta materia.
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="border p-4 rounded-lg shadow-sm">
+        <p className="font-bold mb-2">{asig.asignatura.nombre}</p>
+        <div className="overflow-x-auto">
+          <table className="w-full border">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="p-2 border">Alumno</th>
+                <th className="p-2 border">Calificación</th>
+              </tr>
+            </thead>
+            <tbody>
+              {asig.AsignacionesAlumnos.map((a) => (
+                <tr key={a.id}>
+                  <td className="p-2 border whitespace-nowrap">
+                    {a.estudiante.nombre} {a.estudiante.apellidos}
+                  </td>
+                  <td className="p-2 border text-center">
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      className="border px-2 py-1 w-20 text-center"
+                      value={calificaciones[asig.id]?.[a.estudiante.id] ?? ""}
+                      onChange={(e) =>
+                        handleCalificacionChange(
+                          a.estudiante.id,
+                          asig.id,
+                          Number(e.target.value)
+                        )
+                      }
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <button
+          disabled={loading}
+          className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+          onClick={() => guardarCalificaciones(asig.id)}
+        >
+          {loading ? "Guardando..." : "Guardar calificaciones"}
         </button>
       </div>
     );
@@ -350,7 +431,11 @@ export default function DocenteDashboard() {
         )}
 
         {tab === "calificaciones" && (
-          <p>Calificaciones (adaptar de forma similar a asistencias)</p>
+          <div className="space-y-6">
+            {docente.asignaturasAsignadas.map((asig) => (
+              <TablaCalificaciones key={asig.id} asig={asig} />
+            ))}
+          </div>
         )}
       </div>
     </div>

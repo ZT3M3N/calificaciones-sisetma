@@ -140,9 +140,23 @@ model AsignaturaDocente {
   horarios            Horario[]
   asistencias         Asistencia[]
   AsignacionesAlumnos AsignacionesAlumnos[]
+  AsignaturaPeriodo   AsignaturaPeriodo[]
 
   @@unique([asignaturaId, docenteId, cicloEscolar], name: "unico_asignatura_docente_ciclo")
   @@map("asignatura_docente")
+}
+
+model AsignaturaPeriodo {
+  id                   Int      @id @default(autoincrement())
+  asignatura_docenteId Int
+  periodo_evaluacionId Int
+  createdAt            DateTime @default(now()) @map("created_at")
+
+  asignaturaDocente AsignaturaDocente @relation(fields: [asignatura_docenteId], references: [id])
+  periodoEvaluacion PeriodoEvaluacion @relation(fields: [periodo_evaluacionId], references: [id])
+
+  @@unique([asignatura_docenteId, periodo_evaluacionId], name: "unico_asignatura_periodo")
+  @@map("asignatura_periodo")
 }
 
 model Horario {
@@ -166,7 +180,8 @@ model PeriodoEvaluacion {
   porcentaje    Float
   createdAt     DateTime @default(now()) @map("created_at")
 
-  calificaciones Calificacion[]
+  calificaciones    Calificacion[]
+  AsignaturaPeriodo AsignaturaPeriodo[]
 
   @@map("periodo_evaluacion")
 }
