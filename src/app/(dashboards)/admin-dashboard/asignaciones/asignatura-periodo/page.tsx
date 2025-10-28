@@ -2,23 +2,21 @@
 
 import * as React from "react";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
-  CardFooter,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 type Asignatura = { id: number; nombre: string };
 type DocenteAsignatura = {
   id: number;
-  docente: { id: string; nombre: string; apellidos: string };
-  asignatura: { id: string; nombre: string };
+  docente: { id: number; nombre: string; apellidos: string };
 };
 
 type PeriodoForm = {
@@ -29,111 +27,76 @@ type PeriodoForm = {
   ciclo_escolar: string;
 };
 
-type FormPeriodos = {
-  asignaturaId: number;
-  docenteAsignaturaId: number;
-  periodos: PeriodoForm[];
-};
-
 export default function AsignarPeriodosForm() {
-  const [form, setForm] = useState<FormPeriodos>({
-    asignaturaId: 0,
-    docenteAsignaturaId: 0,
-    periodos: [],
-  });
-
   const [asignaturas, setAsignaturas] = useState<Asignatura[]>([]);
-  const [docentesOpciones, setDocentesOpciones] = useState<DocenteAsignatura[]>(
-    []
-  );
+  const [docentesOpciones, setDocentesOpciones] = useState<DocenteAsignatura[]>([]);
+  const [asignaturaId, setAsignaturaId] = useState(0);
+  const [docenteAsignaturaId, setDocenteAsignaturaId] = useState(0);
+  const [periodos, setPeriodos] = useState<PeriodoForm[]>([]);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const router = useRouter();
+  const [mensaje, setMensaje] = useState<string | null>(null);
 
   // Cargar asignaturas
   useEffect(() => {
     fetch("/api/asignaturas")
       .then((res) => res.json())
       .then((data) => setAsignaturas(Array.isArray(data) ? data : []))
-      .catch((err) => console.error("Error cargando asignaturas:", err));
+      .catch(() => console.error("Error cargando asignaturas"));
   }, []);
 
-  // Cargar docentes según asignatura
+  // Cargar docentes cuando cambie la asignatura seleccionada
   useEffect(() => {
-    if (form.asignaturaId === 0) {
+    if (!asignaturaId) {
       setDocentesOpciones([]);
-      setForm((f) => ({ ...f, docenteAsignaturaId: 0 }));
       return;
     }
 
-    fetch(`/api/asignaturas/${form.asignaturaId}/docentes`)
+    fetch(`/api/asignaturas/${asignaturaId}/docentes`)
       .then((res) => res.json())
       .then((data) => setDocentesOpciones(Array.isArray(data) ? data : []))
-      .catch(() => setDocentesOpciones([]));
-  }, [form.asignaturaId]);
+      .catch(() => console.error("Error cargando docentes"));
+  }, [asignaturaId]);
 
-  // Cambios generales (asignatura/docente)
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = Number(e.target.value);
-    setForm({ ...form, [e.target.id]: value });
+  // Añadir un nuevo periodo
+  const agregarPeriodo = () => {
+    setPeriodos([
+      ...periodos,
+      {
+        numero: periodos.length + 1,
+        fecha_inicio: "",
+        fecha_fin: "",
+        porcentaje: 0,
+        ciclo_escolar: "",
+      },
+    ]);
   };
 
-  // Cambios en periodos (tipado correcto)
-  const handleChangePeriodo = (
+  // Eliminar un periodo
+  const eliminarPeriodo = (index: number) => {
+    setPeriodos(periodos.filter((_, i) => i !== index));
+  };
+
+  // Manejar cambios en campos
+  const handlePeriodoChange = (
     index: number,
     field: keyof PeriodoForm,
-    value: string
+    value: string | number
   ) => {
-    const nuevosPeriodos = [...form.periodos];
-
-    if (field === "numero" || field === "porcentaje") {
-      nuevosPeriodos[index][field] = Number(value) as any;
-    } else {
-      nuevosPeriodos[index][field] = value as any;
-    }
-
-    setForm({ ...form, periodos: nuevosPeriodos });
+    const nuevos = [...periodos];
+    (nuevos[index][field] as string | number) = value;
+    setPeriodos(nuevos);
   };
 
-  // Agregar periodo vacío
-  const agregarPeriodo = () => {
-    setForm({
-      ...form,
-      periodos: [
-        ...form.periodos,
-        {
-          numero: 0,
-          fecha_inicio: "",
-          fecha_fin: "",
-          porcentaje: 0,
-          ciclo_escolar: "",
-        },
-      ],
-    });
-  };
-
-  // Eliminar periodo
-  const eliminarPeriodo = (index: number) => {
-    const nuevosPeriodos = form.periodos.filter((_, i) => i !== index);
-    setForm({ ...form, periodos: nuevosPeriodos });
-  };
-
-  // Submit
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  // Enviar datos al backend
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setMessage("");
+    setMensaje(null);
 
     try {
-      if (form.periodos.length === 0) {
-        setMessage("❌ Debes agregar al menos un periodo");
-        setLoading(false);
-        return;
-      }
-
       const payload = {
-        docenteAsignaturaId: form.docenteAsignaturaId,
-        periodos: form.periodos,
+        asignaturaDocenteId: docenteAsignaturaId,
+        periodos,
       };
 
       const res = await fetch("/api/asignaturas/periodos", {
@@ -143,40 +106,45 @@ export default function AsignarPeriodosForm() {
       });
 
       const data = await res.json();
-
       if (res.ok) {
-        setMessage("✅ Periodos asignados correctamente");
-        setForm({ asignaturaId: 0, docenteAsignaturaId: 0, periodos: [] });
-        setDocentesOpciones([]);
+        setMensaje("✅ Periodos asignados correctamente.");
+        setPeriodos([]);
+        setAsignaturaId(0);
+        setDocenteAsignaturaId(0);
       } else {
-        setMessage(`❌ ${data.error}`);
+        setMensaje(`❌ ${data.error || "Error al asignar periodos."}`);
       }
     } catch (error) {
-      setMessage("⚠️ Error de conexión con el servidor");
+      console.error(error);
+      setMensaje("❌ Error de conexión con el servidor.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4">
-      <Card className="w-full max-w-3xl">
+    <div className="flex justify-center items-center min-h-screen p-4">
+      <Card className="w-full max-w-2xl">
         <CardHeader>
-          <CardTitle className="text-center">
-            Asignar Periodos a Asignatura
+          <CardTitle className="text-center text-lg font-semibold">
+            Asignar Periodos a una Asignatura
           </CardTitle>
+          <p className="text-sm text-gray-500 text-center">
+            Selecciona una asignatura, su docente y agrega los periodos de evaluación con sus fechas y porcentajes.
+          </p>
         </CardHeader>
+
         <CardContent>
           <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-            {/* Asignatura */}
-            <div className="grid gap-2">
+            {/* Selección de Asignatura */}
+            <div>
               <Label htmlFor="asignaturaId">Asignatura</Label>
               <select
                 id="asignaturaId"
-                value={form.asignaturaId}
-                onChange={handleChange}
+                value={asignaturaId}
+                onChange={(e) => setAsignaturaId(Number(e.target.value))}
+                className="border rounded p-2 w-full bg-white"
                 required
-                className="border rounded p-2 bg-white"
               >
                 <option value={0}>Selecciona una asignatura</option>
                 {asignaturas.map((a) => (
@@ -185,155 +153,125 @@ export default function AsignarPeriodosForm() {
                   </option>
                 ))}
               </select>
+              <p className="text-xs text-gray-500 mt-1">
+                Selecciona la materia a la que deseas asignar periodos.
+              </p>
             </div>
 
-            {/* Docente */}
-            <div className="grid gap-2">
+            {/* Selección de Docente */}
+            <div>
               <Label htmlFor="docenteAsignaturaId">Docente</Label>
               <select
                 id="docenteAsignaturaId"
-                value={form.docenteAsignaturaId}
-                onChange={handleChange}
-                required
+                value={docenteAsignaturaId}
+                onChange={(e) => setDocenteAsignaturaId(Number(e.target.value))}
                 disabled={docentesOpciones.length === 0}
-                className="border rounded p-2 bg-white"
+                className="border rounded p-2 w-full bg-white"
+                required
               >
                 <option value={0}>
                   {docentesOpciones.length === 0
                     ? "Selecciona una asignatura primero"
                     : "Selecciona un docente"}
                 </option>
-                {docentesOpciones.map((opt) => (
-                  <option key={opt.id} value={opt.id}>
-                    {opt.docente.nombre} {opt.docente.apellidos}
+                {docentesOpciones.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.docente.nombre} {d.docente.apellidos}
                   </option>
                 ))}
               </select>
+              <p className="text-xs text-gray-500 mt-1">
+                Elige el profesor que impartirá esta asignatura.
+              </p>
             </div>
 
-            {/* Periodos dinámicos */}
+            {/* Lista de Periodos */}
             <div className="flex flex-col gap-4">
-              <Label>Periodos</Label>
-              {form.periodos.map((p, i) => (
+              <Label>Periodos de evaluación</Label>
+              {periodos.map((p, index) => (
                 <div
-                  key={i}
-                  className="border p-3 rounded flex flex-col gap-2 relative"
+                  key={index}
+                  className="border rounded p-3 grid gap-2 bg-gray-50 relative"
                 >
-                  <button
+                  <h4 className="font-semibold">Periodo {p.numero}</h4>
+                  <div className="grid gap-1 sm:grid-cols-2">
+                    <div>
+                      <Label>Fecha de inicio</Label>
+                      <Input
+                        type="date"
+                        value={p.fecha_inicio}
+                        onChange={(e) =>
+                          handlePeriodoChange(index, "fecha_inicio", e.target.value)
+                        }
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label>Fecha de fin</Label>
+                      <Input
+                        type="date"
+                        value={p.fecha_fin}
+                        onChange={(e) =>
+                          handlePeriodoChange(index, "fecha_fin", e.target.value)
+                        }
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="grid gap-1 sm:grid-cols-2">
+                    <div>
+                      <Label>Porcentaje</Label>
+                      <Input
+                        type="number"
+                        placeholder="Ej: 25"
+                        value={p.porcentaje}
+                        onChange={(e) =>
+                          handlePeriodoChange(index, "porcentaje", Number(e.target.value))
+                        }
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label>Ciclo escolar</Label>
+                      <Input
+                        type="text"
+                        placeholder="Ej: 2025-2026"
+                        value={p.ciclo_escolar}
+                        onChange={(e) =>
+                          handlePeriodoChange(index, "ciclo_escolar", e.target.value)
+                        }
+                        required
+                      />
+                    </div>
+                  </div>
+                  <Button
                     type="button"
-                    onClick={() => eliminarPeriodo(i)}
-                    className="absolute top-2 right-2 text-red-500"
+                    variant="destructive"
+                    className="absolute top-2 right-2"
+                    onClick={() => eliminarPeriodo(index)}
                   >
-                    ✕
-                  </button>
-
-                  {/* Número de periodo */}
-                  <div className="flex flex-col">
-                    <Label htmlFor={`numero-${i}`}>Número de periodo</Label>
-                    <Input
-                      id={`numero-${i}`}
-                      type="number"
-                      value={p.numero}
-                      onChange={(e) =>
-                        handleChangePeriodo(i, "numero", e.target.value)
-                      }
-                      placeholder="Ej: 1"
-                      required
-                    />
-                    <p className="text-xs text-gray-500">
-                      Indica el número de este periodo de evaluación.
-                    </p>
-                  </div>
-
-                  {/* Fecha de inicio */}
-                  <div className="flex flex-col">
-                    <Label htmlFor={`fecha_inicio-${i}`}>Fecha de inicio</Label>
-                    <Input
-                      id={`fecha_inicio-${i}`}
-                      type="date"
-                      value={p.fecha_inicio}
-                      onChange={(e) =>
-                        handleChangePeriodo(i, "fecha_inicio", e.target.value)
-                      }
-                      required
-                    />
-                    <p className="text-xs text-gray-500">
-                      Fecha en la que inicia este periodo.
-                    </p>
-                  </div>
-
-                  {/* Fecha de fin */}
-                  <div className="flex flex-col">
-                    <Label htmlFor={`fecha_fin-${i}`}>Fecha de fin</Label>
-                    <Input
-                      id={`fecha_fin-${i}`}
-                      type="date"
-                      value={p.fecha_fin}
-                      onChange={(e) =>
-                        handleChangePeriodo(i, "fecha_fin", e.target.value)
-                      }
-                      required
-                    />
-                    <p className="text-xs text-gray-500">
-                      Fecha en la que finaliza este periodo.
-                    </p>
-                  </div>
-
-                  {/* Porcentaje */}
-                  <div className="flex flex-col">
-                    <Label htmlFor={`porcentaje-${i}`}>Porcentaje</Label>
-                    <Input
-                      id={`porcentaje-${i}`}
-                      type="number"
-                      value={p.porcentaje}
-                      onChange={(e) =>
-                        handleChangePeriodo(i, "porcentaje", e.target.value)
-                      }
-                      placeholder="Ej: 25"
-                      required
-                    />
-                    <p className="text-xs text-gray-500">
-                      Porcentaje que representa este periodo en la calificación
-                      final.
-                    </p>
-                  </div>
-
-                  {/* Ciclo escolar */}
-                  <div className="flex flex-col">
-                    <Label htmlFor={`ciclo_escolar-${i}`}>Ciclo escolar</Label>
-                    <Input
-                      id={`ciclo_escolar-${i}`}
-                      type="text"
-                      value={p.ciclo_escolar}
-                      onChange={(e) =>
-                        handleChangePeriodo(i, "ciclo_escolar", e.target.value)
-                      }
-                      placeholder="Ej: 2025-2026"
-                      required
-                    />
-                    <p className="text-xs text-gray-500">
-                      Indica el ciclo escolar al que pertenece este periodo.
-                    </p>
-                  </div>
+                    Eliminar
+                  </Button>
                 </div>
               ))}
 
-              <Button type="button" onClick={agregarPeriodo}>
-                Agregar periodo
+              <Button type="button" onClick={agregarPeriodo} variant="secondary">
+                + Agregar periodo
               </Button>
             </div>
 
-            <CardFooter className="flex flex-col gap-2 px-0">
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Asignando..." : "Asignar periodos"}
+            {/* Mensaje y botón de envío */}
+            <CardFooter className="flex flex-col gap-3">
+              <Button type="submit" disabled={loading || !periodos.length}>
+                {loading ? "Guardando..." : "Guardar periodos"}
               </Button>
-              {message && (
+              {mensaje && (
                 <p
-                  className={`text-sm mt-2 ${
-                    message.includes("✅") ? "text-green-600" : "text-red-600"
+                  className={`text-sm text-center ${
+                    mensaje.includes("✅") ? "text-green-600" : "text-red-600"
                   }`}
                 >
-                  {message}
+                  {mensaje}
                 </p>
               )}
             </CardFooter>
