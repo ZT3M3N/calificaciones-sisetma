@@ -11,7 +11,6 @@ type TeacherInput = {
   telefono?: string;
 };
 
-// Obtener un docente por ID
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
     const { id } = params;
@@ -40,7 +39,6 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-// Actualizar un docente
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
   try {
     const { id } = params;
@@ -88,7 +86,6 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-// Eliminar un docente
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   try {
     const { id } = params;

@@ -70,7 +70,6 @@ export default function EstudianteDashboard() {
     fetchAlumno();
   }, []);
 
-  // Función para formatear horas en formato 12h AM/PM
   const formatHora12h = (hora: string) => {
     const date = new Date(hora);
     let horas = date.getHours();
@@ -81,7 +80,6 @@ export default function EstudianteDashboard() {
     return `${horas}:${minutos} ${ampm}`;
   };
 
-  // Organizar calificaciones por materia y periodo
   const organizarCalificaciones = () => {
     if (!alumno) return [];
 
@@ -112,10 +110,8 @@ export default function EstudianteDashboard() {
     });
 
     return Array.from(materias.values()).map((materia) => {
-      // Ordenar periodos por nombre
       materia.periodos.sort((a, b) => a.nombre.localeCompare(b.nombre));
       
-      // Calcular promedio ponderado
       const promedio = materia.periodos.reduce((acc, p) => 
         acc + (p.calificacion * p.porcentaje / 100), 0
       );
@@ -124,7 +120,6 @@ export default function EstudianteDashboard() {
     });
   };
 
-  // Función para generar el PDF
   const generarBoletaPDF = () => {
     if (!alumno) return;
 
@@ -136,18 +131,15 @@ export default function EstudianteDashboard() {
       const marginLeft = 14;
       let yPosition = 20;
 
-      // ==== ENCABEZADO ====
       doc.setFontSize(18);
       doc.setFont("helvetica", "bold");
       doc.text("BOLETA DE CALIFICACIONES", pageWidth / 2, yPosition, { align: "center" });
       yPosition += 10;
 
-      // Línea decorativa
       doc.setLineWidth(0.5);
       doc.line(marginLeft, yPosition, pageWidth - marginLeft, yPosition);
       yPosition += 10;
 
-      // ==== INFORMACIÓN DEL ESTUDIANTE ====
       doc.setFontSize(11);
       doc.setFont("helvetica", "bold");
       doc.text("DATOS DEL ESTUDIANTE", marginLeft, yPosition);
@@ -162,20 +154,17 @@ export default function EstudianteDashboard() {
       doc.text(`Carrera: ${alumno.carrera.nombre}`, marginLeft, yPosition);
       yPosition += 10;
 
-      // ==== CALIFICACIONES POR MATERIA ====
       const materiasOrganizadas = organizarCalificaciones();
 
       if (materiasOrganizadas.length === 0) {
         doc.text("No hay calificaciones registradas.", marginLeft, yPosition);
       } else {
         materiasOrganizadas.forEach((materia, index) => {
-          // Verificar si necesitamos una nueva página
           if (yPosition > 250) {
             doc.addPage();
             yPosition = 20;
           }
 
-          // Nombre de la materia
           doc.setFontSize(11);
           doc.setFont("helvetica", "bold");
           doc.text(`${index + 1}. ${materia.asignatura}`, marginLeft, yPosition);
@@ -188,14 +177,12 @@ export default function EstudianteDashboard() {
           doc.text(`Ciclo Escolar: ${materia.cicloEscolar}`, marginLeft + 5, yPosition);
           yPosition += 7;
 
-          // Tabla de periodos
           const tablaPeriodos = materia.periodos.map((p) => [
             p.nombre,
             p.calificacion.toFixed(2),
             `${p.porcentaje}%`,
           ]);
 
-          // Agregar fila de promedio
           tablaPeriodos.push([
             "PROMEDIO FINAL",
             materia.promedio.toFixed(2),
@@ -236,7 +223,6 @@ export default function EstudianteDashboard() {
         });
       }
 
-      // ==== FOOTER ====
       const totalPages = (doc as any).internal.getNumberOfPages();
       
       for (let i = 1; i <= totalPages; i++) {
@@ -262,7 +248,6 @@ export default function EstudianteDashboard() {
         );
       }
 
-      // Guardar el PDF
       doc.save(`Boleta_${alumno.matricula}_${new Date().getTime()}.pdf`);
       
     } catch (error) {

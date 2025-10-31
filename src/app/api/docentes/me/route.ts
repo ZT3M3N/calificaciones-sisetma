@@ -34,7 +34,7 @@ export async function GET(req: Request) {
               include: {
                 estudiante: {
                   select: { 
-                    id: true,           // ← AGREGADO: Este es el campo que faltaba
+                    id: true,
                     nombre: true, 
                     apellidos: true, 
                     matricula: true 

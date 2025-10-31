@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-// Obtener todas las asignaciones (GET)
 export async function GET() {
   try {
     const asignaturasDocentes = await prisma.asignaturaDocente.findMany({
@@ -31,7 +30,6 @@ export async function GET() {
   }
 }
 
-// Crear nueva asignación con horarios (POST)
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -39,7 +37,6 @@ export async function POST(req: Request) {
 
     console.log("📥 Datos recibidos:", body);
 
-    // Validaciones
     if (!docenteId || !asignaturaId || !cicloEscolar) {
       return NextResponse.json(
         { error: "Faltan datos obligatorios: docenteId, asignaturaId o cicloEscolar" },
@@ -54,7 +51,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Validar que el docente existe
     const docente = await prisma.docente.findUnique({
       where: { id: Number(docenteId) },
     });
@@ -66,7 +62,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Validar que la asignatura existe
     const asignatura = await prisma.asignatura.findUnique({
       where: { id: Number(asignaturaId) },
     });
@@ -78,7 +73,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Verificar si ya existe la asignación
     const existente = await prisma.asignaturaDocente.findFirst({
       where: {
         asignaturaId: Number(asignaturaId),
@@ -94,7 +88,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Crear la asignación con los horarios en una transacción
     const nuevaAsignacion = await prisma.asignaturaDocente.create({
       data: {
         asignaturaId: Number(asignaturaId),
@@ -126,7 +119,6 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("❌ Error al crear asignación:", error);
     
-    // Manejar error de constraint único de Prisma
     if (error.code === "P2002") {
       return NextResponse.json(
         { error: "Ya existe una asignación igual para este docente y asignatura" },

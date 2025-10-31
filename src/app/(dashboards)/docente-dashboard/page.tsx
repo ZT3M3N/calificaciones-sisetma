@@ -42,10 +42,8 @@ type PeriodosAsignatura = {
   [asignaturaId: number]: Periodo[];
 };
 
-// Asistencias: asignaturaId -> alumnoId -> fecha -> boolean
 type Asistencias = Record<number, Record<number, Record<string, boolean>>>;
 
-// Calificaciones: asignaturaId -> periodoId -> alumnoId -> number
 type Calificaciones = Record<number, Record<number, Record<number, number>>>;
 
 export default function DocenteDashboard() {
@@ -56,7 +54,6 @@ export default function DocenteDashboard() {
   const [calificaciones, setCalificaciones] = useState<Calificaciones>({});
   const [loading, setLoading] = useState(false);
 
-  // --- Cargar datos del docente ---
   useEffect(() => {
     async function fetchDocente() {
       try {
@@ -70,7 +67,6 @@ export default function DocenteDashboard() {
     fetchDocente();
   }, []);
 
-  // --- Cargar periodos ---
   useEffect(() => {
     if (!docente) return;
 
@@ -110,7 +106,6 @@ export default function DocenteDashboard() {
     fetchPeriodos();
   }, [docente]);
 
-  // --- Cargar asistencias ---
   useEffect(() => {
     if (tab !== "asistencias" || !docente) return;
 
@@ -131,7 +126,6 @@ export default function DocenteDashboard() {
     fetchAsistencias();
   }, [tab, docente]);
 
-  // --- Cargar calificaciones ---
   useEffect(() => {
     if (tab !== "calificaciones" || !docente) return;
 
@@ -154,7 +148,6 @@ export default function DocenteDashboard() {
 
   if (!docente) return <p className="p-6">Cargando...</p>;
 
-  // --- Helpers ---
   const handleAsistenciaChange = (alumnoId: number, asignaturaId: number, fecha: string, valor: boolean) => {
     setAsistencias((prev) => ({
       ...prev,
@@ -239,7 +232,6 @@ export default function DocenteDashboard() {
     return ((sumaCalificaciones / sumaPorcentajes) * 100).toFixed(2);
   };
 
-  // --- Renderizado simplificado de tabs ---
   const cards = [
     { title: "Horarios", key: "horarios", icon: Timer, color: "bg-teal-500" },
     { title: "Alumnos", key: "alumnos", icon: Users, color: "bg-blue-500" },
@@ -253,7 +245,6 @@ export default function DocenteDashboard() {
         Bienvenido, {docente.nombre} {docente.apellidos}
       </h1>
 
-      {/* Tabs */}
       <div className="flex gap-4 mb-6">
         {cards.map((c) => {
           const Icon = c.icon;

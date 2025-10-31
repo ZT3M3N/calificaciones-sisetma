@@ -41,7 +41,6 @@ export async function GET(req: Request) {
           },
         },
         asignaciones: {
-          // <-- usar el nombre correcto de la relación
           include: {
             asignatura_docente: {
               include: {

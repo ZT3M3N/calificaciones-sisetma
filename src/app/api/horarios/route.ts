@@ -54,8 +54,7 @@ export async function POST(req: Request) {
       });
     }
 
-    // Convertimos las horas a DateTime compatible
-    const fechaBase = new Date().toISOString().split("T")[0]; // fecha actual (solo día)
+    const fechaBase = new Date().toISOString().split("T")[0];
     const horaInicio = new Date(`${fechaBase}T${hora_inicio}`);
     const horaFin = new Date(`${fechaBase}T${hora_fin}`);
 

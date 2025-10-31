@@ -6,7 +6,6 @@ import { NextResponse } from "next/server";
 const prisma = new PrismaClient();
 const SECRET_KEY = process.env.JWT_SECRET!;
 
-// LOGIN DE ESTUDIANTE
 export async function POST(req: Request) {
   try {
     const { correo, contraseña } = await req.json();
@@ -18,11 +17,10 @@ export async function POST(req: Request) {
       );
     }
 
-    // Buscar estudiante en la base de datos
     const estudiante = await prisma.estudiante.findUnique({
       where: { correo },
       include: {
-        carrera: { select: { nombre: true } }, // ejemplo: mostrar nombre de carrera
+        carrera: { select: { nombre: true } },
       },
     });
 
@@ -33,7 +31,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Comparar contraseña
     const passwordMatch = await bcrypt.compare(contraseña, estudiante.contraseña);
     if (!passwordMatch) {
       return NextResponse.json(
@@ -42,7 +39,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Crear token con datos del estudiante
     const token = jwt.sign(
       {
         id: estudiante.id,
@@ -53,7 +49,6 @@ export async function POST(req: Request) {
       { expiresIn: "2h" }
     );
 
-    // Enviar token como cookie HTTPOnly
     const response = NextResponse.json({
       message: "✅ Login exitoso",
       user: {
@@ -70,7 +65,7 @@ export async function POST(req: Request) {
       name: "token",
       value: token,
       httpOnly: true,
-      maxAge: 7200, // 2 horas
+      maxAge: 7200, 
       path: "/",
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",

@@ -12,7 +12,7 @@ type EstudianteInput = {
   telefono: string;
   estado?: string;
   contraseña?: string;
-  carreraId: number; // importante
+  carreraId: number;
 };
 
 export async function POST(req: Request): Promise<Response> {
@@ -39,8 +39,8 @@ export async function POST(req: Request): Promise<Response> {
         direccion,
         estado,
         contraseña: hashedPassword,
-        rol: { connect: { id: 3 } },       // rol estudiante
-        carrera: { connect: { id: carreraId } } // conectamos la carrera
+        rol: { connect: { id: 3 } },       
+        carrera: { connect: { id: carreraId } } 
       },
     });
 
@@ -77,7 +77,6 @@ export async function PUT(req: Request, { params }: { params: { id: string } }):
       updateData.contraseña = await bcrypt.hash(body.contraseña, 10);
     }
 
-    // Conexión de la carrera si se recibe carreraId
     if (body.carreraId) {
       updateData.carrera = { connect: { id: body.carreraId } };
     }

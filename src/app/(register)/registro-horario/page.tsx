@@ -42,7 +42,6 @@ export default function RegistroHorario() {
     AsignaturaDocente[]
   >([]);
 
-  // Cargar asignaturas-docentes desde el backend
   React.useEffect(() => {
     async function fetchAsignaturasDocentes() {
       try {
@@ -52,17 +51,16 @@ export default function RegistroHorario() {
         }
         const data = await res.json();
 
-        // Verifica que sea un array
         if (!Array.isArray(data)) {
           console.error("Data no es un array:", data);
-          setAsignaturasDocentes([]); // evita errores
+          setAsignaturasDocentes([]); 
           return;
         }
 
         setAsignaturasDocentes(data);
       } catch (error) {
         console.error("Error al cargar asignaturas-docentes:", error);
-        setAsignaturasDocentes([]); // evita errores
+        setAsignaturasDocentes([]);
       }
     }
     fetchAsignaturasDocentes();

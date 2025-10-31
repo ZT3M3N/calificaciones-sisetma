@@ -36,7 +36,6 @@ export default function EditPeriodoPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // Cargar datos del periodo al montar
   useEffect(() => {
     async function fetchPeriodo() {
       try {
@@ -45,7 +44,7 @@ export default function EditPeriodoPage() {
         if (res.ok) {
           setForm({
             nombre: data.nombre,
-            fecha_inicio: data.fecha_inicio.split("T")[0], // Ajustar formato para <input type="date" />
+            fecha_inicio: data.fecha_inicio.split("T")[0],
             fecha_fin: data.fecha_fin.split("T")[0],
             ciclo_escolar: data.ciclo_escolar,
             porcentaje: data.porcentaje.toString(),

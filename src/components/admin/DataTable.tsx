@@ -42,19 +42,16 @@ export default function DataTable({
 }: DataTableProps) {
   function formatValue(value: any) {
     if (value instanceof Date) {
-      // Formatear hora o fecha según sea TIME o DATETIME
       return value.toLocaleString("es-MX", {
         hour: "2-digit",
         minute: "2-digit",
       });
     }
 
-    // Si es null o undefined
     if (value === null || value === undefined) {
       return "";
     }
 
-    // Si es objeto (por ejemplo relaciones anidadas)
     if (typeof value === "object") {
       return JSON.stringify(value);
     }

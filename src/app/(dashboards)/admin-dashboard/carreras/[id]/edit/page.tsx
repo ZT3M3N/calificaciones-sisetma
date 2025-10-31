@@ -20,7 +20,7 @@ type CarreraInput = {
 };
 
 export default function EditCarrera() {
-  const params = useParams(); // Obtiene el id desde la ruta
+  const params = useParams(); 
   const router = useRouter();
   const [form, setForm] = useState<CarreraInput>({
     nombre: "",
@@ -30,7 +30,6 @@ export default function EditCarrera() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // Cargar los datos de la carrera al montar el componente
   useEffect(() => {
     async function fetchCarrera() {
       try {
@@ -73,7 +72,7 @@ export default function EditCarrera() {
       const data = await res.json();
       if (res.ok) {
         setMessage("✅ Carrera actualizada exitosamente");
-        router.refresh(); // refresca la vista de lista
+        router.refresh();
       } else {
         setMessage(`❌ ${data.error}`);
       }

@@ -34,7 +34,6 @@ export default function EditDocentePage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // Cargar datos del docente al montar
   useEffect(() => {
     async function fetchDocente() {
       try {
@@ -77,7 +76,7 @@ export default function EditDocentePage() {
       const data = await res.json();
       if (res.ok) {
         setMessage("✅ Docente actualizado exitosamente");
-        router.refresh(); // Refresca la lista de docentes
+        router.refresh(); 
       } else {
         setMessage(`❌ ${data.error}`);
       }

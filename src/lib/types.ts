@@ -1,54 +1,47 @@
-export type Student = {
-  id: string
-  name: string
-  email: string
-  enrollmentNumber: string
-  career?: string
-  assignedSubjects?: string[]
-  assignedTeachers?: string[]
-  assignedGroups?: string[]
-  grades?: { subjectId: string; grade: number; date: string }[]
-}
+export type PeriodoEvaluacion = {
+  id: number;
+  nombre: string;
+  porcentaje: number;
+};
 
-export type Teacher = {
-  id: string
-  name: string
-  email: string
-  department: string
-}
+export type Calificacion = {
+  id: number;
+  calificacion: number;
+  faltas: number;
+  observaciones: string | null;
+  periodo_evaluacion: PeriodoEvaluacion;
+  asignatura_docente: {
+    cicloEscolar: string;
+    asignatura: { nombre: string };
+    docente: { nombre: string; apellidos: string };
+    horarios: {
+      dia_semana: string;
+      hora_inicio: string;
+      hora_fin: string;
+      aula: string;
+    }[];
+  };
+};
 
-export type Subject = {
-  id: string
-  name: string
-  code: string
-  credits: number
-}
-
-export type Career = {
-  id: string
-  name: string
-  duration: string
-}
-
-export type Schedule = {
-  id: string
-  day: string
-  startTime: string
-  endTime: string
-  classroom: string
-}
-
-export type Group = {
-  id: string
-  name: string
-  capacity: number
-  enrolled: number
-}
-
-export type Grade = {
-  id: string
-  studentName: string
-  subjectName: string
-  grade: number
-  date: string
-}
+export type Alumno = {
+  id: number;
+  nombre: string;
+  apellidos: string;
+  matricula: string;
+  correo: string;
+  carrera: { nombre: true };
+  asignaciones: {
+    id: number;
+    asignatura_docente: {
+      asignatura: { nombre: string };
+      docente: { nombre: string; apellidos: string };
+      horarios: {
+        dia_semana: string;
+        hora_inicio: string;
+        hora_fin: string;
+        aula: string;
+      }[];
+    };
+  }[];
+  calificaciones: Calificacion[];
+};

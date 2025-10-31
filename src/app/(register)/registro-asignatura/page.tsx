@@ -49,7 +49,6 @@ export default function AsignaturaForm() {
   const [loading, setLoading] = React.useState(false);
   const [message, setMessage] = React.useState("");
 
-  // Obtener carreras para el dropdown
   React.useEffect(() => {
     const fetchCarreras = async () => {
       try {

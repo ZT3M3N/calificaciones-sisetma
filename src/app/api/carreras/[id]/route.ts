@@ -8,7 +8,6 @@ type CarreraInput = {
   descripcion?: string;
 };
 
-// Obtener una carrera específica
 export async function GET(
   req: Request,
   { params }: { params: { id: string } }
@@ -38,7 +37,6 @@ export async function GET(
   }
 }
 
-// Actualizar una carrera
 export async function PUT(
   req: Request,
   { params }: { params: { id: string } }
@@ -73,7 +71,6 @@ export async function PUT(
   }
 }
 
-// Eliminar una carrera
 export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }

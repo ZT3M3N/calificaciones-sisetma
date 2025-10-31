@@ -15,7 +15,6 @@ export async function POST(req: Request) {
       }[];
     };
 
-    // Validación de datos básicos
     if (!asignaturaDocenteId || !periodos || periodos.length === 0) {
       return new Response(
         JSON.stringify({ error: "Faltan datos requeridos" }),
@@ -23,17 +22,13 @@ export async function POST(req: Request) {
       );
     }
 
-    // Array donde almacenaremos las asignaciones creadas
     const asignaciones = [];
 
-    // Iterar sobre cada periodo recibido
     for (const periodo of periodos) {
-      // 🔹 Verificar si ya existe el periodo en la BD
       let periodoExistente = await prisma.periodoEvaluacion.findUnique({
         where: { id: periodo.numero },
       });
 
-      // 🔹 Si no existe, lo creamos
       if (!periodoExistente) {
         periodoExistente = await prisma.periodoEvaluacion.create({
           data: {
@@ -47,7 +42,6 @@ export async function POST(req: Request) {
         });
       }
 
-      // 🔹 Crear (o mantener si ya existe) la relación con la asignatura_docente
       const asignacion = await prisma.asignaturaPeriodo.upsert({
         where: {
           unico_asignatura_periodo: {

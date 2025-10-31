@@ -5,7 +5,6 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { estudianteId, asignatura_docenteId } = body;
 
-    // Validar datos obligatorios
     if (!estudianteId || !asignatura_docenteId) {
       return new Response(
         JSON.stringify({ error: "Faltan datos obligatorios" }),
@@ -13,7 +12,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Evitar duplicados (un estudiante no puede tener la misma asignatura_docente dos veces)
     const existe = await prisma.asignacionesAlumnos.findFirst({
       where: {
         estudianteId: Number(estudianteId),
@@ -28,7 +26,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Crear la asignación
     const asignacion = await prisma.asignacionesAlumnos.create({
       data: {
         estudianteId: Number(estudianteId),
@@ -75,7 +72,6 @@ export async function GET() {
       orderBy: { id: "desc" },
     });
 
-    // Siempre devolver un array (aunque esté vacío)
     return new Response(JSON.stringify(asignaciones || []), {
       headers: { "Content-Type": "application/json" },
     });
@@ -83,7 +79,6 @@ export async function GET() {
   } catch (error) {
     console.error("❌ Error al obtener asignaciones:", error);
 
-    // También devolver un array vacío en caso de error
     return new Response(JSON.stringify([]), {
       status: 500,
       headers: { "Content-Type": "application/json" },

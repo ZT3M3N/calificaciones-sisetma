@@ -69,7 +69,6 @@ export default function StudentForm({
 
   const router = useRouter();
 
-  // Traer carreras al montar
   React.useEffect(() => {
     fetch("/api/carreras")
       .then((res) => res.json())

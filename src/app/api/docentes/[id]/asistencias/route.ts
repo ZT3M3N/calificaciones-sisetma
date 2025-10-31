@@ -1,20 +1,16 @@
-// src/app/api/docentes/[id]/asistencias/route.ts
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-// --- Helper para extraer ID desde la URL ---
 function getDocenteIdFromUrl(req: NextRequest) {
   const segments = req.nextUrl.pathname.split("/").filter(Boolean);
-  // Suponiendo la estructura: /api/docentes/[id]/asistencias
-  const idStr = segments[2]; // segments[0] = 'api', segments[1] = 'docentes', segments[2] = id
+  const idStr = segments[2]; 
   const id = Number(idStr);
   if (isNaN(id)) throw new Error("ID de docente inválido");
   return id;
 }
 
-// --- GET: obtener asistencias de un docente ---
 export async function GET(req: NextRequest) {
   try {
     const docenteId = getDocenteIdFromUrl(req);
@@ -61,7 +57,6 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// --- POST: guardar o actualizar asistencias ---
 export async function POST(req: NextRequest) {
   try {
     const docenteId = getDocenteIdFromUrl(req);

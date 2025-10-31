@@ -1,4 +1,3 @@
-// src/app/api/asignaturas/[id]/docentes/route.ts
 import { prisma } from "@/lib/prisma";
 
 interface Params {

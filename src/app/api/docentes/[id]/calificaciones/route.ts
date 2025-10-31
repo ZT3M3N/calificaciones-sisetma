@@ -5,7 +5,6 @@ interface Params {
   params: { id: string };
 }
 
-// GET: Obtener calificaciones de un docente para un periodo
 export async function GET(req: Request, { params }: Params) {
   try {
     const docenteId = Number(params.id);
@@ -16,13 +15,11 @@ export async function GET(req: Request, { params }: Params) {
       );
     }
 
-    // Obtener periodo activo desde query string, opcional
     const url = new URL(req.url);
     const periodoId = url.searchParams.get("periodo")
       ? Number(url.searchParams.get("periodo"))
       : null;
 
-    // Buscar asignaturas asignadas al docente
     const asignaturas = await prisma.asignaturaDocente.findMany({
       where: { docenteId },
       include: {
@@ -78,11 +75,9 @@ export async function POST(req: Request, { params }: Params) {
       return NextResponse.json({ error: "Periodo inválido" }, { status: 400 });
     }
 
-    // Iterar por cada asignatura y alumno
     for (const [asignaturaIdStr, alumnos] of Object.entries(data)) {
       const asignaturaId = Number(asignaturaIdStr);
 
-      // ✅ Tipar alumnos como Record<number, number>
       const alumnosMap = alumnos as Record<number, number>;
 
       for (const [alumnoIdStr, calificacion] of Object.entries(alumnosMap)) {

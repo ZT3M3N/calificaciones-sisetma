@@ -11,7 +11,6 @@ export async function GET(req: Request, { params }: Params) {
     if (isNaN(docenteId))
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
 
-    // 🔹 Buscar periodos asignados a las materias del docente
     const periodos = await prisma.asignaturaPeriodo.findMany({
       where: {
         asignaturaDocente: { docenteId },

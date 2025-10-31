@@ -27,7 +27,6 @@ export default function CalificacionesPage() {
     observaciones: "",
   });
 
-  // 🔹 Obtener lista de estudiantes
   useEffect(() => {
     async function fetchEstudiantes() {
       const res = await fetch("/api/estudiantes");
@@ -37,7 +36,6 @@ export default function CalificacionesPage() {
     fetchEstudiantes();
   }, []);
 
-  // 🔹 Obtener materias cuando se selecciona un estudiante
   useEffect(() => {
     if (selectedEstudiante) {
       async function fetchMaterias() {
@@ -49,13 +47,11 @@ export default function CalificacionesPage() {
     }
   }, [selectedEstudiante]);
 
-  // 🔹 Manejo del cambio de formulario
   const handleChange = (e: any) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 🔹 Enviar calificación
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const res = await fetch("/api/calificaciones", {

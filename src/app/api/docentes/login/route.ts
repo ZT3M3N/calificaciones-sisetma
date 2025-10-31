@@ -6,7 +6,6 @@ import { NextResponse } from "next/server";
 const prisma = new PrismaClient();
 const SECRET_KEY = process.env.JWT_SECRET!;
 
-// LOGIN DE DOCENTE
 export async function POST(req: Request) {
   try {
     const { correo, contraseña } = await req.json();
@@ -18,10 +17,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // Buscar docente en la base de datos
     const docente = await prisma.docente.findUnique({
       where: { correo },
-      // puedes incluir información adicional si quieres, ej. asignaturas, rol
       include: {
         rol: true,
       },
@@ -34,7 +31,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Comparar contraseña
     const passwordMatch = await bcrypt.compare(contraseña, docente.contraseña);
     if (!passwordMatch) {
       return NextResponse.json(
@@ -43,7 +39,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Crear token JWT
     const token = jwt.sign(
       {
         id: docente.id,
@@ -54,7 +49,6 @@ export async function POST(req: Request) {
       { expiresIn: "2h" }
     );
 
-    // Respuesta con cookie HTTPOnly
     const response = NextResponse.json({
       message: "✅ Login exitoso",
       user: {
@@ -70,7 +64,7 @@ export async function POST(req: Request) {
       name: "token",
       value: token,
       httpOnly: true,
-      maxAge: 7200, // 2 horas
+      maxAge: 7200,
       path: "/",
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",

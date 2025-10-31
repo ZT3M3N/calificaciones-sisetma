@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/prisma";
 
-// Obtener todas las calificaciones
 export async function GET() {
   try {
     const calificaciones = await prisma.calificacion.findMany({
@@ -35,7 +34,6 @@ export async function GET() {
   }
 }
 
-// Registrar nueva calificación
 export async function POST(req: Request) {
   try {
     const body = await req.json();

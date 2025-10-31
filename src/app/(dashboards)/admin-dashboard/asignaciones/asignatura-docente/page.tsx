@@ -37,7 +37,6 @@ export default function RegistroAsignaturaDocente() {
 
   const router = useRouter();
 
-  // Cargar docentes
   useEffect(() => {
     fetch("/api/docentes")
       .then((res) => res.json())
@@ -45,7 +44,6 @@ export default function RegistroAsignaturaDocente() {
       .catch((err) => console.error("Error cargando docentes:", err));
   }, []);
 
-  // Cargar asignaturas
   useEffect(() => {
     fetch("/api/asignaturas")
       .then((res) => res.json())

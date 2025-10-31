@@ -36,7 +36,6 @@ export default function AsignarPeriodosForm() {
   const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState<string | null>(null);
 
-  // Cargar asignaturas
   useEffect(() => {
     fetch("/api/asignaturas")
       .then((res) => res.json())
@@ -44,7 +43,6 @@ export default function AsignarPeriodosForm() {
       .catch(() => console.error("Error cargando asignaturas"));
   }, []);
 
-  // Cargar docentes cuando cambie la asignatura seleccionada
   useEffect(() => {
     if (!asignaturaId) {
       setDocentesOpciones([]);
@@ -57,7 +55,6 @@ export default function AsignarPeriodosForm() {
       .catch(() => console.error("Error cargando docentes"));
   }, [asignaturaId]);
 
-  // Añadir un nuevo periodo
   const agregarPeriodo = () => {
     setPeriodos([
       ...periodos,
@@ -71,12 +68,10 @@ export default function AsignarPeriodosForm() {
     ]);
   };
 
-  // Eliminar un periodo
   const eliminarPeriodo = (index: number) => {
     setPeriodos(periodos.filter((_, i) => i !== index));
   };
 
-  // Manejar cambios en campos
   const handlePeriodoChange = (
     index: number,
     field: keyof PeriodoForm,
@@ -87,7 +82,6 @@ export default function AsignarPeriodosForm() {
     setPeriodos(nuevos);
   };
 
-  // Enviar datos al backend
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);

@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/prisma";
 
-// 🔹 Obtener un solo periodo por ID
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
     const id = Number(params.id);
@@ -29,7 +28,6 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-// 🔹 Actualizar periodo
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
   try {
     const id = Number(params.id);
@@ -64,7 +62,6 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-// 🔹 Eliminar periodo
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   try {
     const id = Number(params.id);
